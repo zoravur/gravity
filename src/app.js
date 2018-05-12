@@ -13,15 +13,14 @@ function animate() {
   let prevTime;
 
   function draw(timestamp) {
-    //console.log('animating...');
+    cx.clearRect(0, 0, canvas.width, canvas.height);
     if (!start) start = timestamp;
-    //let t = (timestamp - start) / 1000;
 
     let elapsedTime = (timestamp - prevTime) / 1000;
 
     projectiles.forEach(proj => {
-      proj.updatePosition(elapsedTime);
       proj.draw(cx);
+      proj.updatePosition(elapsedTime);
     });
     
     prevTime = timestamp; //store time for next frame;
@@ -43,8 +42,8 @@ function handleMouseDown(event) {
     let newProj = computeProjectile(startX, startY, endX, endY);
     console.log('newProj', newProj);
     canvas.removeEventListener('mouseup', handleMouseUp);
-    //projectiles.push(newProj);
-    //console.log(projectiles);
+    projectiles.push(newProj);
+    console.log(projectiles);
   }
 
   canvas.addEventListener('mouseup', handleMouseUp);

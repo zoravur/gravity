@@ -17,7 +17,7 @@ class Projectile {
     let v2 = this.updateVelocity(elapsedTime);
     let vAvg = Vec.times(Vec.plus(v1, v2), 0.5);
 
-    let d = Vec.times(vAvg * elapsedTime);
+    let d = Vec.times(vAvg, elapsedTime);
     this.position = Vec.plus(this.position, d);
     return this.position;
   }
@@ -32,6 +32,6 @@ class Projectile {
   }
 }
 
-Projectile.prototype.acceleration = new Vec(0, 20);
+Projectile.prototype.acceleration = new Vec(0, 200);
 
 export default Projectile;
