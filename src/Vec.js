@@ -7,7 +7,7 @@ export default class Vec {
   toPolar() {
     return {
       magnitude: Math.hypot(this.x, this.y),
-      angle: Math.atan2(this.x, this.y)
+      angle: Math.atan2(this.y, this.x)
     };
   }
 

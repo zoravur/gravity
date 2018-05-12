@@ -7,7 +7,6 @@ let projectiles = [];
 let canvas = document.getElementById('canvas');
 let cx = canvas.getContext('2d');
 
-
 function animate() {
   let start;
   let prevTime;
@@ -19,6 +18,7 @@ function animate() {
     let elapsedTime = (timestamp - prevTime) / 1000;
 
     projectiles.forEach(proj => {
+      proj.updateAcceleration(projectiles);
       proj.draw(cx);
       proj.updatePosition(elapsedTime);
     });

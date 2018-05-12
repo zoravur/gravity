@@ -1,9 +1,29 @@
 import Vec from './Vec.js';
 
+const bigG = -10000;
+
 class Projectile {
   constructor(position, velocity) {
     this.position = position;
     this.velocity = velocity;
+    this.acceleration = new Vec(0,0);
+    this.mass = 100;
+  }
+
+  updateAcceleration (projectiles) {
+    let totalForce = new Vec(0,0);
+    projectiles.forEach(proj => {
+      if (proj != this) {
+        let {magnitude, angle} = 
+          Vec.minus(this.position, proj.position).toPolar();
+        let forceMag = bigG*proj.mass*this.mass/(magnitude*magnitude);
+        let force = Vec.fromPolar(forceMag, angle);
+        console.log(force);
+        totalForce = Vec.plus(totalForce, force);
+      }
+    });
+    this.acceleration = Vec.times(totalForce, 1 / this.mass);
+    return this.acceleration;
   }
 
   updateVelocity (elapsedTime) {
@@ -32,6 +52,6 @@ class Projectile {
   }
 }
 
-Projectile.prototype.acceleration = new Vec(0, 200);
+//Projectile.prototype.acceleration = new Vec(0,150);
 
 export default Projectile;
