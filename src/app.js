@@ -7,8 +7,8 @@ let projectiles = [];
 let canvas = document.getElementById('canvas');
 let cx = canvas.getContext('2d');
 
-function animate() {
 
+function animate() {
   let start;
   let prevTime;
 
@@ -31,42 +31,41 @@ function animate() {
   requestAnimationFrame(draw);
 }
 
+
 function handleMouseDown(event) {
-  let startX = event.x;
-  let startY = event.y;
+  let startX = event.offsetX;
+  let startY = event.offsetY;
 
   function handleMouseUp(event) {
-    //console.log("Mouse down:", startX, startY)
-    //console.log("Mouse up:", event.x, event.y);
-    let endX = event.x;
-    let endY = event.y;
-
-    console.log('Args: ', startX, startY, endX, endY);
-
-    function computeProjectile (x1, y1, x2, y2) {
-      let startVec = new Vec(x1, y1);
-      //console.log('startVec', startVec);
-      let endVec = new Vec(x2, y2);
-      let deltaVec = Vec.minus(endVec, startVec);
-      console.log('endVec', endVec);
-      console.log('deltaVec', deltaVec);
-
-      let proj = new Projectile(startVec, deltaVec);
-      console.log('proj', proj);
-      return proj;
-      
-    }
+    let endX = event.offsetX;
+    let endY = event.offsetY;
 
     let newProj = computeProjectile(startX, startY, endX, endY);
     console.log('newProj', newProj);
-    projectiles.push(newProj);
     canvas.removeEventListener('mouseup', handleMouseUp);
+    //projectiles.push(newProj);
+    //console.log(projectiles);
   }
 
   canvas.addEventListener('mouseup', handleMouseUp);
 }
 
-animate();
-
 canvas.addEventListener('mousedown', handleMouseDown);
 
+animate();
+
+function computeProjectile (x1, y1, x2, y2) {
+  console.log('In computeProjectile:');
+  console.log(arguments);
+
+  let startVec = new Vec(x1, y1);
+  let endVec = new Vec(x2, y2);
+  let deltaVec = Vec.minus(endVec, startVec);
+  let proj = new Projectile(startVec, deltaVec);
+
+  console.log('startVec', startVec);
+  console.log('endVec', endVec);
+  console.log('proj', proj);
+
+  return proj;
+}
