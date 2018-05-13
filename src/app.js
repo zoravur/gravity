@@ -4,6 +4,7 @@ import Vec from './Vec.js';
 
 let projectiles = [];
 let clickAndDrag = {};
+let offScreenTime = 0;
 
 let canvas = document.getElementById('canvas');
 let cx = canvas.getContext('2d');
@@ -36,7 +37,8 @@ function animate() {
     cx.fillRect(0, 0, canvas.width, canvas.height);
     if (!start) start = timestamp;
 
-    let elapsedTime = (timestamp - prevTime) / 1000;
+    let elapsedTime = (timestamp - prevTime - offScreenTime) / 1000;
+    if (offScreenTime != 0) offScreenTime = 0;
 
     if (JSON.stringify(clickAndDrag) != JSON.stringify({})) {
       cx.strokeStyle = 'blue';
@@ -63,7 +65,20 @@ function animate() {
   }
 
   requestAnimationFrame(draw);
+
 }
+
+document.addEventListener('visibilitychange', function() {
+  let state = document.visibilityState;
+  if (state == 'hidden') {
+    offScreenTime = Date.now();
+    let handleOnScreen = function() {
+      offScreenTime = Date.now() - offScreenTime;
+      document.removeEventListener('visibilitychange', handleOnScreen);
+    };
+    document.addEventListener('visibilitychange', handleOnScreen);
+  }
+});
 
 function handleMouseDown(event) {
   let startX = event.offsetX;
