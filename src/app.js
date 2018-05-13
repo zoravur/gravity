@@ -49,9 +49,11 @@ function animate() {
       cx.strokeStyle = 'black';
     }
 
-
     projectiles.forEach(proj => {
       proj.updateAcceleration(projectiles);
+    });
+
+    projectiles.forEach(proj => {
       proj.draw(cx);
       proj.updatePosition(elapsedTime);
     });
