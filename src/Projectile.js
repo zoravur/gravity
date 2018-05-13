@@ -3,7 +3,6 @@ import interpolate from 'color-interpolate';
 
 const bigG = -100;
 
-
 class Projectile {
   constructor(position, velocity, mass) {
     this.position = position;
