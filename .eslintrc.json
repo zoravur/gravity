@@ -26,7 +26,7 @@
             "always"
         ],
         "no-unused-vars": [
-            "warn"
+            "off"
         ],
         "no-console": [
             "off"

@@ -1,13 +1,22 @@
 import Vec from './Vec.js';
+import interpolate from 'color-interpolate';
 
-const bigG = -10000;
+const bigG = -100;
+
 
 class Projectile {
-  constructor(position, velocity) {
+  constructor(position, velocity, mass) {
     this.position = position;
     this.velocity = velocity;
     this.acceleration = new Vec(0,0);
-    this.mass = 100;
+    this.mass = mass || 100;
+  }
+
+  computeColor () {
+    //    let colormap = interpolate(['blue', 'red']);
+    let colormap = x => `hsl(${260*x - 50},100%,50%)`;
+
+    return colormap(Math.cbrt(this.mass/100)/2);
   }
 
   updateAcceleration (projectiles) {
@@ -16,9 +25,10 @@ class Projectile {
       if (proj != this) {
         let {magnitude, angle} = 
           Vec.minus(this.position, proj.position).toPolar();
-        let forceMag = bigG*proj.mass*this.mass/(magnitude*magnitude);
+        let forceMag = bigG*proj.mass*this.mass/(magnitude);
+        // NOTICE THE ABOVE LINE... magnitude(distance) isn't squared.
+        // It's because the simulation is 2 dimensional.
         let force = Vec.fromPolar(forceMag, angle);
-        console.log(force);
         totalForce = Vec.plus(totalForce, force);
       }
     });
@@ -43,15 +53,18 @@ class Projectile {
   }
 
   draw(cx) {
+    let oldColor = cx.fillStyle = cx.strokeStyle;
+
+    cx.fillStyle = cx.strokeStyle = this.computeColor();
     cx.fillRect(this.position.x - 5, this.position.y - 5, 10, 10);
     cx.beginPath();
     cx.moveTo(this.position.x, this.position.y);
     let endPoint = Vec.plus(this.position, this.velocity);
     cx.lineTo(endPoint.x, endPoint.y);
     cx.stroke();
+
+    cx.strokeStyle = cx.fillStyle = oldColor;
   }
 }
-
-//Projectile.prototype.acceleration = new Vec(0,150);
 
 export default Projectile;
