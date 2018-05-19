@@ -64,6 +64,16 @@ class Projectile {
 
     cx.strokeStyle = cx.fillStyle = oldColor;
   }
+
+  static computeCollision(p1, p2) {
+    let m1 = Vec.times(p1.velocity,p1.mass);
+    let m2 = Vec.times(p2.velocity,p2.mass);
+    let momentum = Vec.plus(m1, m2);
+    let mass = +p1.mass + +p2.mass;
+    let position = Vec.times(Vec.plus(p1.position, p2.position),0.5);
+    let velocity = Vec.times(momentum, 1/mass);
+    return new Projectile(position, velocity, mass);
+  }
 }
 
 export default Projectile;
