@@ -17,9 +17,9 @@ export default class State {
     return new State(this.projectiles);
   }
 
-  draw(cx) {
+  draw(cx, cameraPosition) {
     this.projectiles.forEach(proj => {
-      proj.draw(cx);
+      proj.draw(cx, cameraPosition);
     });
   }
 

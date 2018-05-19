@@ -12,6 +12,7 @@ let input;
 function animate() {
   state = new State([]);
   input = new Input(canvas, state);
+  let cameraShift = new Vec(0, 0);
   let cx = canvas.getContext('2d');
   let start;
   let prevTime;
@@ -20,16 +21,16 @@ function animate() {
     cx.fillRect(0, 0, canvas.width, canvas.height);
     let elapsedTime = 1/60;
 
+    //Draw blue input line
+    input.drawInput();
+    
     //Updating state more granularly allows for better physics.
     state = state.update(elapsedTime / 4);
     state = state.update(elapsedTime / 4);
     state = state.update(elapsedTime / 4);
     state = state.update(elapsedTime / 4);
-    state.draw(cx);
+    state.draw(cx, input.getCameraPosition());
 
-    //Draw blue input line
-    input.drawInput();
-    
     //Set up next frame
     prevTime = timestamp; //store time for next frame
     requestAnimationFrame(draw);

@@ -51,15 +51,20 @@ class Projectile {
     return this.position;
   }
 
-  draw(cx) {
+  draw(cx, C) {
+    //C is for camera
     let oldColor = cx.fillStyle = cx.strokeStyle;
 
     cx.fillStyle = cx.strokeStyle = this.computeColor();
-    cx.fillRect(this.position.x - 5, this.position.y - 5, 10, 10);
+    cx.fillRect(
+      this.position.x - 5 + C.x, 
+      this.position.y - 5 + C.y, 
+      10, 10
+    );
     cx.beginPath();
-    cx.moveTo(this.position.x, this.position.y);
+    cx.moveTo(this.position.x + C.x, this.position.y + C.y);
     let endPoint = Vec.plus(this.position, this.velocity);
-    cx.lineTo(endPoint.x, endPoint.y);
+    cx.lineTo(endPoint.x + C.x, endPoint.y + C.y);
     cx.stroke();
 
     cx.strokeStyle = cx.fillStyle = oldColor;
