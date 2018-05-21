@@ -35,20 +35,24 @@ class Projectile {
     return this.acceleration;
   }
 
-  updateVelocity (elapsedTime) {
-    let dV = Vec.times(this.acceleration, elapsedTime);
-    this.velocity = Vec.plus(this.velocity, dV);
-    return this.velocity;
-  }
+  //The new and improved updateVelocity & updatePosition
+  integrate(elapsedTime, projectiles) {
+    let prevAcceleration = Vec.plus(this.acceleration, new Vec(0,0));
+    let delta = Vec.plus(
+      Vec.times(this.velocity, elapsedTime),
+      Vec.times(prevAcceleration, (0.5*elapsedTime*elapsedTime))
+    );
+    this.position = Vec.plus(this.position, delta);
+    this.updateAcceleration(projectiles);
+    let avgAcceleration = Vec.times(
+      Vec.plus(prevAcceleration, this.acceleration),
+      0.5
+    );
+    this.velocity = Vec.plus(
+      Vec.times(avgAcceleration, elapsedTime),
+      this.velocity
+    );
 
-  updatePosition(elapsedTime) {
-    let v1 = this.velocity;
-    let v2 = this.updateVelocity(elapsedTime);
-    let vAvg = Vec.times(Vec.plus(v1, v2), 0.5);
-
-    let d = Vec.times(vAvg, elapsedTime);
-    this.position = Vec.plus(this.position, d);
-    return this.position;
   }
 
   draw(cx, C) {

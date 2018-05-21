@@ -8,10 +8,7 @@ export default class State {
 
   update(elapsedTime) {
     this.projectiles.forEach(proj => {
-      proj.updateAcceleration(this.projectiles);
-    });
-    this.projectiles.forEach(proj => {
-      proj.updatePosition(elapsedTime);
+      proj.integrate(elapsedTime, this.projectiles);
     });
     this.computeCollisions();
     return new State(this.projectiles);
