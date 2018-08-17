@@ -5,20 +5,13 @@
   	<title>yay</title>
   </head>
   <body>
-	<script src="/socket.io/socket.io.js" charset="utf-8"></script>
-  	<canvas id="canvas" style="border: 1px solid #000;" width=1000 height=700>
-  	</canvas>
+  	<canvas id="canvas" style="border: 1px solid rgb(0, 0, 0);" width=1000 height=700>
+  	</canvas><br/>
 	<div id="mass-control">
 	  <label>Set default mass
-		<input id="mass" type="number" value="100"></input>
+			<input id="mass" type="number" value="50"/>
 	  </label>
-	  <!--<button type="button" onclick="alert('Hi')" >10</button>-->
 	</div>
 	<script src="main.js"></script>
-	<script>
-	  //var socket = io('http://localhost:3000');
-	  var socket = io();
-	  socket.emit('shitttt');
-	</script>
   </body>
 </html>

@@ -66,7 +66,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/app.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -78,7 +78,53 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("/**\r\n * @module  color-interpolate\r\n * Pick color from palette by index\r\n */\r\n\r\nconst parse = __webpack_require__(/*! color-parse */ \"./node_modules/color-parse/index.js\");\r\nconst hsl = __webpack_require__(/*! color-space/hsl */ \"./node_modules/color-space/hsl.js\");\r\nconst lerp = __webpack_require__(/*! lerp */ \"./node_modules/lerp/index.js\");\r\nconst clamp = __webpack_require__(/*! mumath/clamp */ \"./node_modules/mumath/clamp.js\");\r\n\r\nmodule.exports = interpolate;\r\n\r\nfunction interpolate (palette) {\r\n\tpalette = palette.map(c => {\r\n\t\tc = parse(c);\r\n\t\tif (c.space != 'rgb') {\r\n\t\t\tif (c.space != 'hsl') throw `${c.space} space is not supported.`;\r\n\t\t\tc.values = hsl.rgb(c.values);\r\n\t\t}\r\n\t\tc.values.push(c.alpha);\r\n\t\treturn c.values;\r\n\t});\r\n\r\n\treturn (t, mix = lerp) => {\r\n\t\tt = clamp(t, 0, 1);\r\n\r\n\t\tlet idx = ( palette.length - 1 ) * t,\r\n\t\t\tlIdx = Math.floor( idx ),\r\n\t\t\trIdx = Math.ceil( idx );\r\n\r\n\t\tt = idx - lIdx;\r\n\r\n\t\tlet lColor = palette[lIdx], rColor = palette[rIdx];\r\n\r\n\t\tlet result = lColor.map((v, i) => {\r\n\t\t\tv = mix(v, rColor[i], t);\r\n\t\t\tif (i < 3) v = Math.round(v);\r\n\t\t\treturn v;\r\n\t\t});\r\n\r\n\t\tif (result[3] === 1) {\r\n\t\t\treturn `rgb(${result.slice(0,3)})`;\r\n\t\t}\r\n\t\treturn `rgba(${result})`;\r\n\t};\r\n}\r\n\n\n//# sourceURL=webpack:///./node_modules/color-interpolate/index.js?");
+/**
+ * @module  color-interpolate
+ * Pick color from palette by index
+ */
+
+const parse = __webpack_require__(/*! color-parse */ "./node_modules/color-parse/index.js");
+const hsl = __webpack_require__(/*! color-space/hsl */ "./node_modules/color-space/hsl.js");
+const lerp = __webpack_require__(/*! lerp */ "./node_modules/lerp/index.js");
+const clamp = __webpack_require__(/*! mumath/clamp */ "./node_modules/mumath/clamp.js");
+
+module.exports = interpolate;
+
+function interpolate (palette) {
+	palette = palette.map(c => {
+		c = parse(c);
+		if (c.space != 'rgb') {
+			if (c.space != 'hsl') throw `${c.space} space is not supported.`;
+			c.values = hsl.rgb(c.values);
+		}
+		c.values.push(c.alpha);
+		return c.values;
+	});
+
+	return (t, mix = lerp) => {
+		t = clamp(t, 0, 1);
+
+		let idx = ( palette.length - 1 ) * t,
+			lIdx = Math.floor( idx ),
+			rIdx = Math.ceil( idx );
+
+		t = idx - lIdx;
+
+		let lColor = palette[lIdx], rColor = palette[rIdx];
+
+		let result = lColor.map((v, i) => {
+			v = mix(v, rColor[i], t);
+			if (i < 3) v = Math.round(v);
+			return v;
+		});
+
+		if (result[3] === 1) {
+			return `rgb(${result.slice(0,3)})`;
+		}
+		return `rgba(${result})`;
+	};
+}
+
 
 /***/ }),
 
@@ -90,7 +136,159 @@ eval("/**\r\n * @module  color-interpolate\r\n * Pick color from palette by inde
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\r\n\r\nmodule.exports = {\r\n\t\"aliceblue\": [240, 248, 255],\r\n\t\"antiquewhite\": [250, 235, 215],\r\n\t\"aqua\": [0, 255, 255],\r\n\t\"aquamarine\": [127, 255, 212],\r\n\t\"azure\": [240, 255, 255],\r\n\t\"beige\": [245, 245, 220],\r\n\t\"bisque\": [255, 228, 196],\r\n\t\"black\": [0, 0, 0],\r\n\t\"blanchedalmond\": [255, 235, 205],\r\n\t\"blue\": [0, 0, 255],\r\n\t\"blueviolet\": [138, 43, 226],\r\n\t\"brown\": [165, 42, 42],\r\n\t\"burlywood\": [222, 184, 135],\r\n\t\"cadetblue\": [95, 158, 160],\r\n\t\"chartreuse\": [127, 255, 0],\r\n\t\"chocolate\": [210, 105, 30],\r\n\t\"coral\": [255, 127, 80],\r\n\t\"cornflowerblue\": [100, 149, 237],\r\n\t\"cornsilk\": [255, 248, 220],\r\n\t\"crimson\": [220, 20, 60],\r\n\t\"cyan\": [0, 255, 255],\r\n\t\"darkblue\": [0, 0, 139],\r\n\t\"darkcyan\": [0, 139, 139],\r\n\t\"darkgoldenrod\": [184, 134, 11],\r\n\t\"darkgray\": [169, 169, 169],\r\n\t\"darkgreen\": [0, 100, 0],\r\n\t\"darkgrey\": [169, 169, 169],\r\n\t\"darkkhaki\": [189, 183, 107],\r\n\t\"darkmagenta\": [139, 0, 139],\r\n\t\"darkolivegreen\": [85, 107, 47],\r\n\t\"darkorange\": [255, 140, 0],\r\n\t\"darkorchid\": [153, 50, 204],\r\n\t\"darkred\": [139, 0, 0],\r\n\t\"darksalmon\": [233, 150, 122],\r\n\t\"darkseagreen\": [143, 188, 143],\r\n\t\"darkslateblue\": [72, 61, 139],\r\n\t\"darkslategray\": [47, 79, 79],\r\n\t\"darkslategrey\": [47, 79, 79],\r\n\t\"darkturquoise\": [0, 206, 209],\r\n\t\"darkviolet\": [148, 0, 211],\r\n\t\"deeppink\": [255, 20, 147],\r\n\t\"deepskyblue\": [0, 191, 255],\r\n\t\"dimgray\": [105, 105, 105],\r\n\t\"dimgrey\": [105, 105, 105],\r\n\t\"dodgerblue\": [30, 144, 255],\r\n\t\"firebrick\": [178, 34, 34],\r\n\t\"floralwhite\": [255, 250, 240],\r\n\t\"forestgreen\": [34, 139, 34],\r\n\t\"fuchsia\": [255, 0, 255],\r\n\t\"gainsboro\": [220, 220, 220],\r\n\t\"ghostwhite\": [248, 248, 255],\r\n\t\"gold\": [255, 215, 0],\r\n\t\"goldenrod\": [218, 165, 32],\r\n\t\"gray\": [128, 128, 128],\r\n\t\"green\": [0, 128, 0],\r\n\t\"greenyellow\": [173, 255, 47],\r\n\t\"grey\": [128, 128, 128],\r\n\t\"honeydew\": [240, 255, 240],\r\n\t\"hotpink\": [255, 105, 180],\r\n\t\"indianred\": [205, 92, 92],\r\n\t\"indigo\": [75, 0, 130],\r\n\t\"ivory\": [255, 255, 240],\r\n\t\"khaki\": [240, 230, 140],\r\n\t\"lavender\": [230, 230, 250],\r\n\t\"lavenderblush\": [255, 240, 245],\r\n\t\"lawngreen\": [124, 252, 0],\r\n\t\"lemonchiffon\": [255, 250, 205],\r\n\t\"lightblue\": [173, 216, 230],\r\n\t\"lightcoral\": [240, 128, 128],\r\n\t\"lightcyan\": [224, 255, 255],\r\n\t\"lightgoldenrodyellow\": [250, 250, 210],\r\n\t\"lightgray\": [211, 211, 211],\r\n\t\"lightgreen\": [144, 238, 144],\r\n\t\"lightgrey\": [211, 211, 211],\r\n\t\"lightpink\": [255, 182, 193],\r\n\t\"lightsalmon\": [255, 160, 122],\r\n\t\"lightseagreen\": [32, 178, 170],\r\n\t\"lightskyblue\": [135, 206, 250],\r\n\t\"lightslategray\": [119, 136, 153],\r\n\t\"lightslategrey\": [119, 136, 153],\r\n\t\"lightsteelblue\": [176, 196, 222],\r\n\t\"lightyellow\": [255, 255, 224],\r\n\t\"lime\": [0, 255, 0],\r\n\t\"limegreen\": [50, 205, 50],\r\n\t\"linen\": [250, 240, 230],\r\n\t\"magenta\": [255, 0, 255],\r\n\t\"maroon\": [128, 0, 0],\r\n\t\"mediumaquamarine\": [102, 205, 170],\r\n\t\"mediumblue\": [0, 0, 205],\r\n\t\"mediumorchid\": [186, 85, 211],\r\n\t\"mediumpurple\": [147, 112, 219],\r\n\t\"mediumseagreen\": [60, 179, 113],\r\n\t\"mediumslateblue\": [123, 104, 238],\r\n\t\"mediumspringgreen\": [0, 250, 154],\r\n\t\"mediumturquoise\": [72, 209, 204],\r\n\t\"mediumvioletred\": [199, 21, 133],\r\n\t\"midnightblue\": [25, 25, 112],\r\n\t\"mintcream\": [245, 255, 250],\r\n\t\"mistyrose\": [255, 228, 225],\r\n\t\"moccasin\": [255, 228, 181],\r\n\t\"navajowhite\": [255, 222, 173],\r\n\t\"navy\": [0, 0, 128],\r\n\t\"oldlace\": [253, 245, 230],\r\n\t\"olive\": [128, 128, 0],\r\n\t\"olivedrab\": [107, 142, 35],\r\n\t\"orange\": [255, 165, 0],\r\n\t\"orangered\": [255, 69, 0],\r\n\t\"orchid\": [218, 112, 214],\r\n\t\"palegoldenrod\": [238, 232, 170],\r\n\t\"palegreen\": [152, 251, 152],\r\n\t\"paleturquoise\": [175, 238, 238],\r\n\t\"palevioletred\": [219, 112, 147],\r\n\t\"papayawhip\": [255, 239, 213],\r\n\t\"peachpuff\": [255, 218, 185],\r\n\t\"peru\": [205, 133, 63],\r\n\t\"pink\": [255, 192, 203],\r\n\t\"plum\": [221, 160, 221],\r\n\t\"powderblue\": [176, 224, 230],\r\n\t\"purple\": [128, 0, 128],\r\n\t\"rebeccapurple\": [102, 51, 153],\r\n\t\"red\": [255, 0, 0],\r\n\t\"rosybrown\": [188, 143, 143],\r\n\t\"royalblue\": [65, 105, 225],\r\n\t\"saddlebrown\": [139, 69, 19],\r\n\t\"salmon\": [250, 128, 114],\r\n\t\"sandybrown\": [244, 164, 96],\r\n\t\"seagreen\": [46, 139, 87],\r\n\t\"seashell\": [255, 245, 238],\r\n\t\"sienna\": [160, 82, 45],\r\n\t\"silver\": [192, 192, 192],\r\n\t\"skyblue\": [135, 206, 235],\r\n\t\"slateblue\": [106, 90, 205],\r\n\t\"slategray\": [112, 128, 144],\r\n\t\"slategrey\": [112, 128, 144],\r\n\t\"snow\": [255, 250, 250],\r\n\t\"springgreen\": [0, 255, 127],\r\n\t\"steelblue\": [70, 130, 180],\r\n\t\"tan\": [210, 180, 140],\r\n\t\"teal\": [0, 128, 128],\r\n\t\"thistle\": [216, 191, 216],\r\n\t\"tomato\": [255, 99, 71],\r\n\t\"turquoise\": [64, 224, 208],\r\n\t\"violet\": [238, 130, 238],\r\n\t\"wheat\": [245, 222, 179],\r\n\t\"white\": [255, 255, 255],\r\n\t\"whitesmoke\": [245, 245, 245],\r\n\t\"yellow\": [255, 255, 0],\r\n\t\"yellowgreen\": [154, 205, 50]\r\n};\r\n\n\n//# sourceURL=webpack:///./node_modules/color-name/index.js?");
+
+
+module.exports = {
+	"aliceblue": [240, 248, 255],
+	"antiquewhite": [250, 235, 215],
+	"aqua": [0, 255, 255],
+	"aquamarine": [127, 255, 212],
+	"azure": [240, 255, 255],
+	"beige": [245, 245, 220],
+	"bisque": [255, 228, 196],
+	"black": [0, 0, 0],
+	"blanchedalmond": [255, 235, 205],
+	"blue": [0, 0, 255],
+	"blueviolet": [138, 43, 226],
+	"brown": [165, 42, 42],
+	"burlywood": [222, 184, 135],
+	"cadetblue": [95, 158, 160],
+	"chartreuse": [127, 255, 0],
+	"chocolate": [210, 105, 30],
+	"coral": [255, 127, 80],
+	"cornflowerblue": [100, 149, 237],
+	"cornsilk": [255, 248, 220],
+	"crimson": [220, 20, 60],
+	"cyan": [0, 255, 255],
+	"darkblue": [0, 0, 139],
+	"darkcyan": [0, 139, 139],
+	"darkgoldenrod": [184, 134, 11],
+	"darkgray": [169, 169, 169],
+	"darkgreen": [0, 100, 0],
+	"darkgrey": [169, 169, 169],
+	"darkkhaki": [189, 183, 107],
+	"darkmagenta": [139, 0, 139],
+	"darkolivegreen": [85, 107, 47],
+	"darkorange": [255, 140, 0],
+	"darkorchid": [153, 50, 204],
+	"darkred": [139, 0, 0],
+	"darksalmon": [233, 150, 122],
+	"darkseagreen": [143, 188, 143],
+	"darkslateblue": [72, 61, 139],
+	"darkslategray": [47, 79, 79],
+	"darkslategrey": [47, 79, 79],
+	"darkturquoise": [0, 206, 209],
+	"darkviolet": [148, 0, 211],
+	"deeppink": [255, 20, 147],
+	"deepskyblue": [0, 191, 255],
+	"dimgray": [105, 105, 105],
+	"dimgrey": [105, 105, 105],
+	"dodgerblue": [30, 144, 255],
+	"firebrick": [178, 34, 34],
+	"floralwhite": [255, 250, 240],
+	"forestgreen": [34, 139, 34],
+	"fuchsia": [255, 0, 255],
+	"gainsboro": [220, 220, 220],
+	"ghostwhite": [248, 248, 255],
+	"gold": [255, 215, 0],
+	"goldenrod": [218, 165, 32],
+	"gray": [128, 128, 128],
+	"green": [0, 128, 0],
+	"greenyellow": [173, 255, 47],
+	"grey": [128, 128, 128],
+	"honeydew": [240, 255, 240],
+	"hotpink": [255, 105, 180],
+	"indianred": [205, 92, 92],
+	"indigo": [75, 0, 130],
+	"ivory": [255, 255, 240],
+	"khaki": [240, 230, 140],
+	"lavender": [230, 230, 250],
+	"lavenderblush": [255, 240, 245],
+	"lawngreen": [124, 252, 0],
+	"lemonchiffon": [255, 250, 205],
+	"lightblue": [173, 216, 230],
+	"lightcoral": [240, 128, 128],
+	"lightcyan": [224, 255, 255],
+	"lightgoldenrodyellow": [250, 250, 210],
+	"lightgray": [211, 211, 211],
+	"lightgreen": [144, 238, 144],
+	"lightgrey": [211, 211, 211],
+	"lightpink": [255, 182, 193],
+	"lightsalmon": [255, 160, 122],
+	"lightseagreen": [32, 178, 170],
+	"lightskyblue": [135, 206, 250],
+	"lightslategray": [119, 136, 153],
+	"lightslategrey": [119, 136, 153],
+	"lightsteelblue": [176, 196, 222],
+	"lightyellow": [255, 255, 224],
+	"lime": [0, 255, 0],
+	"limegreen": [50, 205, 50],
+	"linen": [250, 240, 230],
+	"magenta": [255, 0, 255],
+	"maroon": [128, 0, 0],
+	"mediumaquamarine": [102, 205, 170],
+	"mediumblue": [0, 0, 205],
+	"mediumorchid": [186, 85, 211],
+	"mediumpurple": [147, 112, 219],
+	"mediumseagreen": [60, 179, 113],
+	"mediumslateblue": [123, 104, 238],
+	"mediumspringgreen": [0, 250, 154],
+	"mediumturquoise": [72, 209, 204],
+	"mediumvioletred": [199, 21, 133],
+	"midnightblue": [25, 25, 112],
+	"mintcream": [245, 255, 250],
+	"mistyrose": [255, 228, 225],
+	"moccasin": [255, 228, 181],
+	"navajowhite": [255, 222, 173],
+	"navy": [0, 0, 128],
+	"oldlace": [253, 245, 230],
+	"olive": [128, 128, 0],
+	"olivedrab": [107, 142, 35],
+	"orange": [255, 165, 0],
+	"orangered": [255, 69, 0],
+	"orchid": [218, 112, 214],
+	"palegoldenrod": [238, 232, 170],
+	"palegreen": [152, 251, 152],
+	"paleturquoise": [175, 238, 238],
+	"palevioletred": [219, 112, 147],
+	"papayawhip": [255, 239, 213],
+	"peachpuff": [255, 218, 185],
+	"peru": [205, 133, 63],
+	"pink": [255, 192, 203],
+	"plum": [221, 160, 221],
+	"powderblue": [176, 224, 230],
+	"purple": [128, 0, 128],
+	"rebeccapurple": [102, 51, 153],
+	"red": [255, 0, 0],
+	"rosybrown": [188, 143, 143],
+	"royalblue": [65, 105, 225],
+	"saddlebrown": [139, 69, 19],
+	"salmon": [250, 128, 114],
+	"sandybrown": [244, 164, 96],
+	"seagreen": [46, 139, 87],
+	"seashell": [255, 245, 238],
+	"sienna": [160, 82, 45],
+	"silver": [192, 192, 192],
+	"skyblue": [135, 206, 235],
+	"slateblue": [106, 90, 205],
+	"slategray": [112, 128, 144],
+	"slategrey": [112, 128, 144],
+	"snow": [255, 250, 250],
+	"springgreen": [0, 255, 127],
+	"steelblue": [70, 130, 180],
+	"tan": [210, 180, 140],
+	"teal": [0, 128, 128],
+	"thistle": [216, 191, 216],
+	"tomato": [255, 99, 71],
+	"turquoise": [64, 224, 208],
+	"violet": [238, 130, 238],
+	"wheat": [245, 222, 179],
+	"white": [255, 255, 255],
+	"whitesmoke": [245, 245, 245],
+	"yellow": [255, 255, 0],
+	"yellowgreen": [154, 205, 50]
+};
+
 
 /***/ }),
 
@@ -102,7 +300,182 @@ eval("\r\n\r\nmodule.exports = {\r\n\t\"aliceblue\": [240, 248, 255],\r\n\t\"ant
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/* WEBPACK VAR INJECTION */(function(global) {/**\r\n * @module color-parse\r\n */\r\n\r\n\r\n\r\nvar names = __webpack_require__(/*! color-name */ \"./node_modules/color-name/index.js\")\r\nvar isObject = __webpack_require__(/*! is-plain-obj */ \"./node_modules/is-plain-obj/index.js\")\r\nvar defined = __webpack_require__(/*! defined */ \"./node_modules/defined/index.js\")\r\n\r\nmodule.exports = parse\r\n\r\n/**\r\n * Base hues\r\n * http://dev.w3.org/csswg/css-color/#typedef-named-hue\r\n */\r\n//FIXME: use external hue detector\r\nvar baseHues = {\r\n\tred: 0,\r\n\torange: 60,\r\n\tyellow: 120,\r\n\tgreen: 180,\r\n\tblue: 240,\r\n\tpurple: 300\r\n}\r\n\r\n/**\r\n * Parse color from the string passed\r\n *\r\n * @return {Object} A space indicator `space`, an array `values` and `alpha`\r\n */\r\nfunction parse (cstr) {\r\n\tvar m, parts = [], alpha = 1, space\r\n\r\n\tif (typeof cstr === 'string') {\r\n\t\t//keyword\r\n\t\tif (names[cstr]) {\r\n\t\t\tparts = names[cstr].slice()\r\n\t\t\tspace = 'rgb'\r\n\t\t}\r\n\r\n\t\t//reserved words\r\n\t\telse if (cstr === 'transparent') {\r\n\t\t\talpha = 0\r\n\t\t\tspace = 'rgb'\r\n\t\t\tparts = [0,0,0]\r\n\t\t}\r\n\r\n\t\t//hex\r\n\t\telse if (/^#[A-Fa-f0-9]+$/.test(cstr)) {\r\n\t\t\tvar base = cstr.slice(1)\r\n\t\t\tvar size = base.length\r\n\t\t\tvar isShort = size <= 4\r\n\t\t\talpha = 1\r\n\r\n\t\t\tif (isShort) {\r\n\t\t\t\tparts = [\r\n\t\t\t\t\tparseInt(base[0] + base[0], 16),\r\n\t\t\t\t\tparseInt(base[1] + base[1], 16),\r\n\t\t\t\t\tparseInt(base[2] + base[2], 16)\r\n\t\t\t\t]\r\n\t\t\t\tif (size === 4) {\r\n\t\t\t\t\talpha = parseInt(base[3] + base[3], 16) / 255\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tparts = [\r\n\t\t\t\t\tparseInt(base[0] + base[1], 16),\r\n\t\t\t\t\tparseInt(base[2] + base[3], 16),\r\n\t\t\t\t\tparseInt(base[4] + base[5], 16)\r\n\t\t\t\t]\r\n\t\t\t\tif (size === 8) {\r\n\t\t\t\t\talpha = parseInt(base[6] + base[7], 16) / 255\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tif (!parts[0]) parts[0] = 0\r\n\t\t\tif (!parts[1]) parts[1] = 0\r\n\t\t\tif (!parts[2]) parts[2] = 0\r\n\r\n\t\t\tspace = 'rgb'\r\n\t\t}\r\n\r\n\t\t//color space\r\n\t\telse if (m = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\\s*\\(([^\\)]*)\\)/.exec(cstr)) {\r\n\t\t\tvar name = m[1]\r\n\t\t\tvar base = name.replace(/a$/, '')\r\n\t\t\tspace = base\r\n\t\t\tvar size = base === 'cmyk' ? 4 : base === 'gray' ? 1 : 3\r\n\t\t\tparts = m[2].trim()\r\n\t\t\t\t.split(/\\s*,\\s*/)\r\n\t\t\t\t.map(function (x, i) {\r\n\t\t\t\t\t//<percentage>\r\n\t\t\t\t\tif (/%$/.test(x)) {\r\n\t\t\t\t\t\t//alpha\r\n\t\t\t\t\t\tif (i === size)\treturn parseFloat(x) / 100\r\n\t\t\t\t\t\t//rgb\r\n\t\t\t\t\t\tif (base === 'rgb') return parseFloat(x) * 255 / 100\r\n\t\t\t\t\t\treturn parseFloat(x)\r\n\t\t\t\t\t}\r\n\t\t\t\t\t//hue\r\n\t\t\t\t\telse if (base[i] === 'h') {\r\n\t\t\t\t\t\t//<deg>\r\n\t\t\t\t\t\tif (/deg$/.test(x)) {\r\n\t\t\t\t\t\t\treturn parseFloat(x)\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\t//<base-hue>\r\n\t\t\t\t\t\telse if (baseHues[x] !== undefined) {\r\n\t\t\t\t\t\t\treturn baseHues[x]\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t\treturn parseFloat(x)\r\n\t\t\t\t})\r\n\r\n\t\t\tif (name === base) parts.push(1)\r\n\t\t\talpha = parts[size] === undefined ? 1 : parts[size]\r\n\t\t\tparts = parts.slice(0, size)\r\n\t\t}\r\n\r\n\t\t//named channels case\r\n\t\telse if (cstr.length > 10 && /[0-9](?:\\s|\\/)/.test(cstr)) {\r\n\t\t\tparts = cstr.match(/([0-9]+)/g).map(function (value) {\r\n\t\t\t\treturn parseFloat(value)\r\n\t\t\t})\r\n\r\n\t\t\tspace = cstr.match(/([a-z])/ig).join('').toLowerCase()\r\n\t\t}\r\n\t}\r\n\r\n\t//numeric case\r\n\telse if (typeof cstr === 'number') {\r\n\t\tspace = 'rgb'\r\n\t\tparts = [cstr >>> 16, (cstr & 0x00ff00) >>> 8, cstr & 0x0000ff]\r\n\t}\r\n\r\n\t//object case - detects css cases of rgb and hsl\r\n\telse if (isObject(cstr)) {\r\n\t\tvar r = defined(cstr.r, cstr.red, cstr.R, null)\r\n\r\n\t\tif (r !== null) {\r\n\t\t\tspace = 'rgb'\r\n\t\t\tparts = [\r\n\t\t\t\tr,\r\n\t\t\t\tdefined(cstr.g, cstr.green, cstr.G),\r\n\t\t\t\tdefined(cstr.b, cstr.blue, cstr.B)\r\n\t\t\t]\r\n\t\t}\r\n\t\telse {\r\n\t\t\tspace = 'hsl'\r\n\t\t\tparts = [\r\n\t\t\t\tdefined(cstr.h, cstr.hue, cstr.H),\r\n\t\t\t\tdefined(cstr.s, cstr.saturation, cstr.S),\r\n\t\t\t\tdefined(cstr.l, cstr.lightness, cstr.L, cstr.b, cstr.brightness)\r\n\t\t\t]\r\n\t\t}\r\n\r\n\t\talpha = defined(cstr.a, cstr.alpha, cstr.opacity, 1)\r\n\r\n\t\tif (cstr.opacity != null) alpha /= 100\r\n\t}\r\n\r\n\t//array\r\n\telse if (Array.isArray(cstr) || global.ArrayBuffer && ArrayBuffer.isView && ArrayBuffer.isView(cstr)) {\r\n\t\tparts = [cstr[0], cstr[1], cstr[2]]\r\n\t\tspace = 'rgb'\r\n\t\talpha = cstr.length === 4 ? cstr[3] : 1\r\n\t}\r\n\r\n\treturn {\r\n\t\tspace: space,\r\n\t\tvalues: parts,\r\n\t\talpha: alpha\r\n\t}\r\n}\r\n\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ \"./node_modules/webpack/buildin/global.js\")))\n\n//# sourceURL=webpack:///./node_modules/color-parse/index.js?");
+/* WEBPACK VAR INJECTION */(function(global) {/**
+ * @module color-parse
+ */
+
+
+
+var names = __webpack_require__(/*! color-name */ "./node_modules/color-name/index.js")
+var isObject = __webpack_require__(/*! is-plain-obj */ "./node_modules/is-plain-obj/index.js")
+var defined = __webpack_require__(/*! defined */ "./node_modules/defined/index.js")
+
+module.exports = parse
+
+/**
+ * Base hues
+ * http://dev.w3.org/csswg/css-color/#typedef-named-hue
+ */
+//FIXME: use external hue detector
+var baseHues = {
+	red: 0,
+	orange: 60,
+	yellow: 120,
+	green: 180,
+	blue: 240,
+	purple: 300
+}
+
+/**
+ * Parse color from the string passed
+ *
+ * @return {Object} A space indicator `space`, an array `values` and `alpha`
+ */
+function parse (cstr) {
+	var m, parts = [], alpha = 1, space
+
+	if (typeof cstr === 'string') {
+		//keyword
+		if (names[cstr]) {
+			parts = names[cstr].slice()
+			space = 'rgb'
+		}
+
+		//reserved words
+		else if (cstr === 'transparent') {
+			alpha = 0
+			space = 'rgb'
+			parts = [0,0,0]
+		}
+
+		//hex
+		else if (/^#[A-Fa-f0-9]+$/.test(cstr)) {
+			var base = cstr.slice(1)
+			var size = base.length
+			var isShort = size <= 4
+			alpha = 1
+
+			if (isShort) {
+				parts = [
+					parseInt(base[0] + base[0], 16),
+					parseInt(base[1] + base[1], 16),
+					parseInt(base[2] + base[2], 16)
+				]
+				if (size === 4) {
+					alpha = parseInt(base[3] + base[3], 16) / 255
+				}
+			}
+			else {
+				parts = [
+					parseInt(base[0] + base[1], 16),
+					parseInt(base[2] + base[3], 16),
+					parseInt(base[4] + base[5], 16)
+				]
+				if (size === 8) {
+					alpha = parseInt(base[6] + base[7], 16) / 255
+				}
+			}
+
+			if (!parts[0]) parts[0] = 0
+			if (!parts[1]) parts[1] = 0
+			if (!parts[2]) parts[2] = 0
+
+			space = 'rgb'
+		}
+
+		//color space
+		else if (m = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\s*\(([^\)]*)\)/.exec(cstr)) {
+			var name = m[1]
+			var base = name.replace(/a$/, '')
+			space = base
+			var size = base === 'cmyk' ? 4 : base === 'gray' ? 1 : 3
+			parts = m[2].trim()
+				.split(/\s*,\s*/)
+				.map(function (x, i) {
+					//<percentage>
+					if (/%$/.test(x)) {
+						//alpha
+						if (i === size)	return parseFloat(x) / 100
+						//rgb
+						if (base === 'rgb') return parseFloat(x) * 255 / 100
+						return parseFloat(x)
+					}
+					//hue
+					else if (base[i] === 'h') {
+						//<deg>
+						if (/deg$/.test(x)) {
+							return parseFloat(x)
+						}
+						//<base-hue>
+						else if (baseHues[x] !== undefined) {
+							return baseHues[x]
+						}
+					}
+					return parseFloat(x)
+				})
+
+			if (name === base) parts.push(1)
+			alpha = parts[size] === undefined ? 1 : parts[size]
+			parts = parts.slice(0, size)
+		}
+
+		//named channels case
+		else if (cstr.length > 10 && /[0-9](?:\s|\/)/.test(cstr)) {
+			parts = cstr.match(/([0-9]+)/g).map(function (value) {
+				return parseFloat(value)
+			})
+
+			space = cstr.match(/([a-z])/ig).join('').toLowerCase()
+		}
+	}
+
+	//numeric case
+	else if (!isNaN(cstr)) {
+		space = 'rgb'
+		parts = [cstr >>> 16, (cstr & 0x00ff00) >>> 8, cstr & 0x0000ff]
+	}
+
+	//object case - detects css cases of rgb and hsl
+	else if (isObject(cstr)) {
+		var r = defined(cstr.r, cstr.red, cstr.R, null)
+
+		if (r !== null) {
+			space = 'rgb'
+			parts = [
+				r,
+				defined(cstr.g, cstr.green, cstr.G),
+				defined(cstr.b, cstr.blue, cstr.B)
+			]
+		}
+		else {
+			space = 'hsl'
+			parts = [
+				defined(cstr.h, cstr.hue, cstr.H),
+				defined(cstr.s, cstr.saturation, cstr.S),
+				defined(cstr.l, cstr.lightness, cstr.L, cstr.b, cstr.brightness)
+			]
+		}
+
+		alpha = defined(cstr.a, cstr.alpha, cstr.opacity, 1)
+
+		if (cstr.opacity != null) alpha /= 100
+	}
+
+	//array
+	else if (Array.isArray(cstr) || global.ArrayBuffer && ArrayBuffer.isView && ArrayBuffer.isView(cstr)) {
+		parts = [cstr[0], cstr[1], cstr[2]]
+		space = 'rgb'
+		alpha = cstr.length === 4 ? cstr[3] : 1
+	}
+
+	return {
+		space: space,
+		values: parts,
+		alpha: alpha
+	}
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -114,7 +487,114 @@ eval("/* WEBPACK VAR INJECTION */(function(global) {/**\r\n * @module color-pars
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/**\n * @module color-space/hsl\n */\n\n\nvar rgb = __webpack_require__(/*! ./rgb */ \"./node_modules/color-space/rgb.js\");\n\nmodule.exports = {\n\tname: 'hsl',\n\tmin: [0,0,0],\n\tmax: [360,100,100],\n\tchannel: ['hue', 'saturation', 'lightness'],\n\talias: ['HSL'],\n\n\trgb: function(hsl) {\n\t\tvar h = hsl[0] / 360,\n\t\t\t\ts = hsl[1] / 100,\n\t\t\t\tl = hsl[2] / 100,\n\t\t\t\tt1, t2, t3, rgb, val;\n\n\t\tif (s === 0) {\n\t\t\tval = l * 255;\n\t\t\treturn [val, val, val];\n\t\t}\n\n\t\tif (l < 0.5) {\n\t\t\tt2 = l * (1 + s);\n\t\t}\n\t\telse {\n\t\t\tt2 = l + s - l * s;\n\t\t}\n\t\tt1 = 2 * l - t2;\n\n\t\trgb = [0, 0, 0];\n\t\tfor (var i = 0; i < 3; i++) {\n\t\t\tt3 = h + 1 / 3 * - (i - 1);\n\t\t\tif (t3 < 0) {\n\t\t\t\tt3++;\n\t\t\t}\n\t\t\telse if (t3 > 1) {\n\t\t\t\tt3--;\n\t\t\t}\n\n\t\t\tif (6 * t3 < 1) {\n\t\t\t\tval = t1 + (t2 - t1) * 6 * t3;\n\t\t\t}\n\t\t\telse if (2 * t3 < 1) {\n\t\t\t\tval = t2;\n\t\t\t}\n\t\t\telse if (3 * t3 < 2) {\n\t\t\t\tval = t1 + (t2 - t1) * (2 / 3 - t3) * 6;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tval = t1;\n\t\t\t}\n\n\t\t\trgb[i] = val * 255;\n\t\t}\n\n\t\treturn rgb;\n\t}\n};\n\n\n//extend rgb\nrgb.hsl = function(rgb) {\n\tvar r = rgb[0]/255,\n\t\t\tg = rgb[1]/255,\n\t\t\tb = rgb[2]/255,\n\t\t\tmin = Math.min(r, g, b),\n\t\t\tmax = Math.max(r, g, b),\n\t\t\tdelta = max - min,\n\t\t\th, s, l;\n\n\tif (max === min) {\n\t\th = 0;\n\t}\n\telse if (r === max) {\n\t\th = (g - b) / delta;\n\t}\n\telse if (g === max) {\n\t\th = 2 + (b - r) / delta;\n\t}\n\telse if (b === max) {\n\t\th = 4 + (r - g)/ delta;\n\t}\n\n\th = Math.min(h * 60, 360);\n\n\tif (h < 0) {\n\t\th += 360;\n\t}\n\n\tl = (min + max) / 2;\n\n\tif (max === min) {\n\t\ts = 0;\n\t}\n\telse if (l <= 0.5) {\n\t\ts = delta / (max + min);\n\t}\n\telse {\n\t\ts = delta / (2 - max - min);\n\t}\n\n\treturn [h, s * 100, l * 100];\n};\n\n\n//# sourceURL=webpack:///./node_modules/color-space/hsl.js?");
+/**
+ * @module color-space/hsl
+ */
+
+
+var rgb = __webpack_require__(/*! ./rgb */ "./node_modules/color-space/rgb.js");
+
+module.exports = {
+	name: 'hsl',
+	min: [0,0,0],
+	max: [360,100,100],
+	channel: ['hue', 'saturation', 'lightness'],
+	alias: ['HSL'],
+
+	rgb: function(hsl) {
+		var h = hsl[0] / 360,
+				s = hsl[1] / 100,
+				l = hsl[2] / 100,
+				t1, t2, t3, rgb, val;
+
+		if (s === 0) {
+			val = l * 255;
+			return [val, val, val];
+		}
+
+		if (l < 0.5) {
+			t2 = l * (1 + s);
+		}
+		else {
+			t2 = l + s - l * s;
+		}
+		t1 = 2 * l - t2;
+
+		rgb = [0, 0, 0];
+		for (var i = 0; i < 3; i++) {
+			t3 = h + 1 / 3 * - (i - 1);
+			if (t3 < 0) {
+				t3++;
+			}
+			else if (t3 > 1) {
+				t3--;
+			}
+
+			if (6 * t3 < 1) {
+				val = t1 + (t2 - t1) * 6 * t3;
+			}
+			else if (2 * t3 < 1) {
+				val = t2;
+			}
+			else if (3 * t3 < 2) {
+				val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+			}
+			else {
+				val = t1;
+			}
+
+			rgb[i] = val * 255;
+		}
+
+		return rgb;
+	}
+};
+
+
+//extend rgb
+rgb.hsl = function(rgb) {
+	var r = rgb[0]/255,
+			g = rgb[1]/255,
+			b = rgb[2]/255,
+			min = Math.min(r, g, b),
+			max = Math.max(r, g, b),
+			delta = max - min,
+			h, s, l;
+
+	if (max === min) {
+		h = 0;
+	}
+	else if (r === max) {
+		h = (g - b) / delta;
+	}
+	else if (g === max) {
+		h = 2 + (b - r) / delta;
+	}
+	else if (b === max) {
+		h = 4 + (r - g)/ delta;
+	}
+
+	h = Math.min(h * 60, 360);
+
+	if (h < 0) {
+		h += 360;
+	}
+
+	l = (min + max) / 2;
+
+	if (max === min) {
+		s = 0;
+	}
+	else if (l <= 0.5) {
+		s = delta / (max + min);
+	}
+	else {
+		s = delta / (2 - max - min);
+	}
+
+	return [h, s * 100, l * 100];
+};
+
 
 /***/ }),
 
@@ -126,7 +606,21 @@ eval("/**\n * @module color-space/hsl\n */\n\n\nvar rgb = __webpack_require__(/*
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/**\n * RGB space.\n *\n * @module  color-space/rgb\n */\n\n\nmodule.exports = {\n\tname: 'rgb',\n\tmin: [0,0,0],\n\tmax: [255,255,255],\n\tchannel: ['red', 'green', 'blue'],\n\talias: ['RGB']\n};\n\n\n//# sourceURL=webpack:///./node_modules/color-space/rgb.js?");
+/**
+ * RGB space.
+ *
+ * @module  color-space/rgb
+ */
+
+
+module.exports = {
+	name: 'rgb',
+	min: [0,0,0],
+	max: [255,255,255],
+	channel: ['red', 'green', 'blue'],
+	alias: ['RGB']
+};
+
 
 /***/ }),
 
@@ -137,7 +631,12 @@ eval("/**\n * RGB space.\n *\n * @module  color-space/rgb\n */\n\n\nmodule.expor
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("module.exports = function () {\n    for (var i = 0; i < arguments.length; i++) {\n        if (arguments[i] !== undefined) return arguments[i];\n    }\n};\n\n\n//# sourceURL=webpack:///./node_modules/defined/index.js?");
+module.exports = function () {
+    for (var i = 0; i < arguments.length; i++) {
+        if (arguments[i] !== undefined) return arguments[i];
+    }
+};
+
 
 /***/ }),
 
@@ -149,7 +648,14 @@ eval("module.exports = function () {\n    for (var i = 0; i < arguments.length; 
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\nvar toString = Object.prototype.toString;\n\nmodule.exports = function (x) {\n\tvar prototype;\n\treturn toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));\n};\n\n\n//# sourceURL=webpack:///./node_modules/is-plain-obj/index.js?");
+
+var toString = Object.prototype.toString;
+
+module.exports = function (x) {
+	var prototype;
+	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
+};
+
 
 /***/ }),
 
@@ -160,7 +666,10 @@ eval("\nvar toString = Object.prototype.toString;\n\nmodule.exports = function (
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("function lerp(v0, v1, t) {\n    return v0*(1-t)+v1*t\n}\nmodule.exports = lerp\n\n//# sourceURL=webpack:///./node_modules/lerp/index.js?");
+function lerp(v0, v1, t) {
+    return v0*(1-t)+v1*t
+}
+module.exports = lerp
 
 /***/ }),
 
@@ -172,7 +681,21 @@ eval("function lerp(v0, v1, t) {\n    return v0*(1-t)+v1*t\n}\nmodule.exports = 
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("/**\r\n * Clamp value.\r\n * Detects proper clamp min/max.\r\n *\r\n * @param {number} a Current value to cut off\r\n * @param {number} min One side limit\r\n * @param {number} max Other side limit\r\n *\r\n * @return {number} Clamped value\r\n */\r\n\r\nmodule.exports = function(a, min, max){\r\n\treturn max > min ? Math.max(Math.min(a,max),min) : Math.max(Math.min(a,min),max);\r\n};\r\n\n\n//# sourceURL=webpack:///./node_modules/mumath/clamp.js?");
+/**
+ * Clamp value.
+ * Detects proper clamp min/max.
+ *
+ * @param {number} a Current value to cut off
+ * @param {number} min One side limit
+ * @param {number} max Other side limit
+ *
+ * @return {number} Clamped value
+ */
+
+module.exports = function(a, min, max){
+	return max > min ? Math.max(Math.min(a,max),min) : Math.max(Math.min(a,min),max);
+};
+
 
 /***/ }),
 
@@ -183,80 +706,519 @@ eval("/**\r\n * Clamp value.\r\n * Detects proper clamp min/max.\r\n *\r\n * @pa
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-eval("var g;\r\n\r\n// This works in non-strict mode\r\ng = (function() {\r\n\treturn this;\r\n})();\r\n\r\ntry {\r\n\t// This works if eval is allowed (see CSP)\r\n\tg = g || Function(\"return this\")() || (1, eval)(\"this\");\r\n} catch (e) {\r\n\t// This works if the window reference is available\r\n\tif (typeof window === \"object\") g = window;\r\n}\r\n\r\n// g can still be undefined, but nothing to do about it...\r\n// We return undefined, instead of nothing here, so it's\r\n// easier to handle this case. if(!global) { ...}\r\n\r\nmodule.exports = g;\r\n\n\n//# sourceURL=webpack:///(webpack)/buildin/global.js?");
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1, eval)("this");
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
 
 /***/ }),
 
-/***/ "./src/Input.js":
+/***/ "./src/Input.ts":
 /*!**********************!*\
-  !*** ./src/Input.js ***!
+  !*** ./src/Input.ts ***!
   \**********************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return Input; });\n/* harmony import */ var _Projectile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Projectile.js */ \"./src/Projectile.js\");\n/* harmony import */ var _Vec_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vec.js */ \"./src/Vec.js\");\n// This class requires a canvas and a state of projectiles as references.\n// It sets up event handlers. Currently it can't add non 100 mass particles.\n\n\n\n\nclass Input {\n  constructor(canv, state) {\n    console.log('construct');\n    this.clickAndDrag = {};\n    this.started = false;\n    this.ended = false;\n    this.state = state;\n    this.canv = canv;\n    this.camX = 0;\n    this.camY = 0;\n    this.dCamX = 0;\n    this.dCamY = 0;\n    this.shiftingCamera = false;\n    canv.addEventListener('mouseup', this.handleMouseUp.bind(this));\n    canv.addEventListener('mousedown', this.handleMouseDown.bind(this));\n    canv.addEventListener('mousemove', this.handleMouseDrag.bind(this));\n  }\n\n  drawInput() {\n    if (this.started == true) {\n      let cx = this.canv.getContext('2d'); \n      cx.strokeStyle = 'blue';\n\n      let x1 = this.startX; let y1 = this.startY;\n      let x2 = this.endX; let y2 = this.endY;\n      cx.beginPath();\n      cx.moveTo(x1, y1);\n      cx.lineTo(x2, y2);\n      cx.stroke();\n\n      cx.strokeStyle = 'black';\n    }\n  }\n\n  handleMouseUp(event) {\n    //if (event.shiftKey) {\n\n    //} else {\n    if (this.started == true) {\n      this.started = false;\n      let endX = event.offsetX;\n      let endY = event.offsetY;\n      let proj = new _Projectile_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n        new _Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.startX - this.camX, this.startY - this.camY),\n        new _Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](endX - this.startX, endY - this.startY)\n      );\n      proj.mass = document.getElementById('mass').value;\n\n      this.state.add(proj);\n      this.startX = undefined;\n      this.startY = undefined;\n      this.endX = undefined;\n      this.endY = undefined;\n    } \n    this.shiftingCamera = false;\n    this.camX += this.dCamX;\n    this.camY += this.dCamY;\n    this.dCamX = 0;\n    this.dCamY = 0;\n    //}\n  }\n\n  handleMouseDown(event) {\n    if (event.shiftKey) {\n      this.shiftingCamera = true;\n      this.startX = event.offsetX;\n      this.startY = event.offsetY;\n    } else {\n      this.started = true;\n      this.startX = event.offsetX;\n      this.startY = event.offsetY;\n    }\n  }\n\n  handleMouseDrag(event) {\n    if (event.shiftKey && this.shiftingCamera) {\n      this.dCamX = event.offsetX - this.startX;\n      this.dCamY = event.offsetY - this.startY;\n    } else {\n      if (this.started == true) {\n        this.endX = event.offsetX;\n        this.endY = event.offsetY;\n      } \n    }\n  }\n\n  getCameraPosition() {\n    return {x: this.camX + this.dCamX, y: this.camY + this.dCamY};\n  }\n\n}\n\n\n\n//# sourceURL=webpack:///./src/Input.js?");
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Projectile_1 = __webpack_require__(/*! ./Projectile */ "./src/Projectile.ts");
+const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+'use strict';
+class Input {
+    constructor(canvas, state, massField) {
+        this.drawInput = () => { };
+        this.massField = massField;
+        this.canvas = canvas;
+        this.cx = canvas.getContext('2d');
+        this.addProjectile = this.bindState(state);
+        this.camera = {
+            delta: Vec_1.default(),
+            position: Vec_1.default()
+        };
+        canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    }
+    bindState(state) {
+        return function addProjectile(proj) {
+            state.add(proj);
+        };
+    }
+    getTransform() {
+        return this.camera.position.plus(this.camera.delta);
+    }
+    setTransform(reverse) {
+        let { x, y } = this.getTransform();
+        if (reverse)
+            this.cx.translate(-x, -y);
+        else
+            this.cx.translate(x, y);
+    }
+    handleMouseDown(event) {
+        if (event.shiftKey) {
+            this.beginViewDrag(Vec_1.default(event.offsetX, event.offsetY));
+        }
+        else {
+            this.beginVectorDraw(Vec_1.default(event.offsetX, event.offsetY));
+        }
+    }
+    beginViewDrag(startVec) {
+        let canvas = this.canvas;
+        let camera = this.camera;
+        let moveHandle = event => {
+            let delta = Vec_1.default(event.offsetX, event.offsetY).minus(startVec);
+            camera.delta = delta;
+        };
+        canvas.addEventListener('mousemove', moveHandle);
+        let upHandle = event => {
+            camera.position = camera.delta.plus(camera.position);
+            camera.delta = Vec_1.default();
+            canvas.removeEventListener('mousemove', moveHandle);
+            canvas.removeEventListener('mouseup', upHandle);
+        };
+        canvas.addEventListener('mouseup', upHandle);
+    }
+    beginVectorDraw(startVec) {
+        let canvas = this.canvas;
+        startVec = startVec.minus(this.camera.position); // Correct for camera placement
+        let moveHandle = event => {
+            let end = Vec_1.default(event.offsetX, event.offsetY);
+            end = end.minus(this.camera.position);
+            this.drawInput = () => {
+                this.cx.save();
+                this.cx.strokeStyle = 'blue';
+                this.cx.beginPath();
+                this.cx.moveTo(startVec.x, startVec.y);
+                this.cx.lineTo(end.x, end.y);
+                this.cx.stroke();
+                this.cx.restore();
+            };
+        };
+        canvas.addEventListener('mousemove', moveHandle);
+        let upHandle = event => {
+            let end = Vec_1.default(event.offsetX, event.offsetY);
+            end = end.minus(this.camera.position);
+            this.drawInput = () => { };
+            let delta = end.minus(startVec);
+            this.addProjectile(new Projectile_1.default(startVec, delta, +this.massField.value));
+            canvas.removeEventListener('mousemove', moveHandle);
+            canvas.removeEventListener('mouseup', upHandle);
+        };
+        canvas.addEventListener('mouseup', upHandle);
+    }
+}
+exports.default = Input;
+
 
 /***/ }),
 
-/***/ "./src/Projectile.js":
+/***/ "./src/Projectile.ts":
 /*!***************************!*\
-  !*** ./src/Projectile.js ***!
+  !*** ./src/Projectile.ts ***!
   \***************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _Vec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vec.js */ \"./src/Vec.js\");\n/* harmony import */ var color_interpolate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! color-interpolate */ \"./node_modules/color-interpolate/index.js\");\n/* harmony import */ var color_interpolate__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(color_interpolate__WEBPACK_IMPORTED_MODULE_1__);\n\n\n\nconst bigG = -100;\n\nclass Projectile {\n  constructor(position, velocity, mass) {\n    this.position = position;\n    this.velocity = velocity;\n    this.acceleration = new _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0,0);\n    this.mass = mass || 100;\n  }\n\n  computeColor () {\n    //    let colormap = interpolate(['blue', 'red']);\n    let colormap = x => `hsl(${260*x - 50},100%,50%)`;\n\n    return colormap(Math.cbrt(this.mass/100)/2);\n  }\n\n  updateAcceleration (projectiles) {\n    let totalForce = new _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0,0);\n    projectiles.forEach(proj => {\n      if (proj != this) {\n        let {magnitude, angle} = \n          _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].minus(this.position, proj.position).toPolar();\n        let forceMag = bigG*proj.mass*this.mass/(magnitude);\n        // NOTICE THE ABOVE LINE... magnitude(distance) isn't squared.\n        // It's because the simulation is 2 dimensional.\n        let force = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].fromPolar(forceMag, angle);\n        totalForce = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(totalForce, force);\n      }\n    });\n    this.acceleration = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(totalForce, 1 / this.mass);\n    return this.acceleration;\n  }\n\n  //The new and improved updateVelocity & updatePosition\n  integrate(elapsedTime, projectiles) {\n    let prevAcceleration = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(this.acceleration, new _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0,0));\n    let delta = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(\n      _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(this.velocity, elapsedTime),\n      _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(prevAcceleration, (0.5*elapsedTime*elapsedTime))\n    );\n    this.position = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(this.position, delta);\n    this.updateAcceleration(projectiles);\n    let avgAcceleration = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(\n      _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(prevAcceleration, this.acceleration),\n      0.5\n    );\n    this.velocity = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(\n      _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(avgAcceleration, elapsedTime),\n      this.velocity\n    );\n\n  }\n\n  draw(cx, C) {\n    //C is for camera\n    let oldColor = cx.fillStyle = cx.strokeStyle;\n\n    cx.fillStyle = cx.strokeStyle = this.computeColor();\n    cx.fillRect(\n      this.position.x - 5 + C.x, \n      this.position.y - 5 + C.y, \n      10, 10\n    );\n    cx.beginPath();\n    cx.moveTo(this.position.x + C.x, this.position.y + C.y);\n    let endPoint = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(this.position, this.velocity);\n    cx.lineTo(endPoint.x + C.x, endPoint.y + C.y);\n    cx.stroke();\n\n    cx.strokeStyle = cx.fillStyle = oldColor;\n  }\n\n  static computeCollision(p1, p2) {\n    let m1 = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(p1.velocity,p1.mass);\n    let m2 = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(p2.velocity,p2.mass);\n    let momentum = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(m1, m2);\n    let mass = +p1.mass + +p2.mass;\n    let position = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(_Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].plus(p1.position, p2.position),0.5);\n    let velocity = _Vec_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].times(momentum, 1/mass);\n    return new Projectile(position, velocity, mass);\n  }\n}\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (Projectile);\n\n\n//# sourceURL=webpack:///./src/Projectile.js?");
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+const interpolate = __webpack_require__(/*! color-interpolate */ "./node_modules/color-interpolate/index.js");
+const bigG = -1;
+class Projectile {
+    constructor(position, velocity, mass) {
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = Vec_1.default(0, 0);
+        this.mass = mass || 50;
+        this.id = Math.random();
+    }
+    get momentum() {
+        return this.velocity.times(this.mass);
+    }
+    computeColor() {
+        let colormap = interpolate(['white', 'orange', 'red']);
+        return colormap(Math.log10(this.mass) / 4);
+    }
+    updateAcceleration(projectiles) {
+        return this.acceleration = projectiles
+            .filter(({ id }) => (id != this.id))
+            .map(proj => ({
+            displacement: this.position.minus(proj.position),
+            mass: proj.mass
+        }))
+            .map(({ displacement, mass }) => Vec_1.default(
+        /* Gmm/r^2 */
+        bigG * mass * this.mass / displacement.magnitude, displacement.angle, true // Is polar
+        ))
+            .reduce((total, cur) => total.plus(cur), Vec_1.default())
+            .times(1 / this.mass);
+    }
+    //The new and improved updateVelocity & updatePosition
+    integrate(elapsedTime, projectiles) {
+        let a_0 = this.acceleration.plus(Vec_1.default(0, 0));
+        // d = v1*t + 1/2at^2
+        let delta = this.velocity.times(elapsedTime).plus(a_0.times(0.5 * elapsedTime * elapsedTime));
+        this.position = this.position.plus(delta);
+        this.updateAcceleration(projectiles);
+        let avgAcceleration = a_0.plus(this.acceleration).times(0.5);
+        // a = (v2 - v1) / t => v2 = v1 + at
+        this.velocity = this.velocity.plus(avgAcceleration.times(elapsedTime));
+    }
+    draw(cx, C) {
+        cx.save();
+        //cx.translate(0.5, 0.5);
+        cx.fillStyle = cx.strokeStyle = this.computeColor();
+        cx.beginPath();
+        cx.arc(this.position.x + C.x, this.position.y + C.y, (Math.log(Math.abs(this.mass)) + 2) / 1.5, 0, 2 * Math.PI);
+        cx.fill();
+        cx.beginPath();
+        cx.moveTo(this.position.x + C.x, this.position.y + C.y);
+        let endPoint = this.position.plus(this.velocity);
+        cx.lineTo(endPoint.x + C.x, endPoint.y + C.y);
+        cx.stroke();
+        cx.restore();
+    }
+    static computeCollision(p1, p2) {
+        let mass = +p1.mass + +p2.mass;
+        let position = p1.position.plus(p2.position).times(0.5);
+        let velocity = p1.momentum.plus(p2.momentum).times(1 / mass);
+        return new Projectile(position, velocity, mass);
+    }
+}
+exports.default = Projectile;
+
 
 /***/ }),
 
-/***/ "./src/State.js":
+/***/ "./src/State.ts":
 /*!**********************!*\
-  !*** ./src/State.js ***!
+  !*** ./src/State.ts ***!
   \**********************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return State; });\n/* harmony import */ var _Projectile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Projectile.js */ \"./src/Projectile.js\");\n/* harmony import */ var _Vec_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vec.js */ \"./src/Vec.js\");\n\n\n\nclass State {\n  constructor(projectiles) {\n    this.projectiles = projectiles;\n  }\n\n  update(elapsedTime) {\n    this.projectiles.forEach(proj => {\n      proj.integrate(elapsedTime, this.projectiles);\n    });\n    this.computeCollisions();\n    return new State(this.projectiles);\n  }\n\n  draw(cx, cameraPosition) {\n    this.projectiles.forEach(proj => {\n      proj.draw(cx, cameraPosition);\n    });\n  }\n\n  add(proj) {\n    this.projectiles.push(proj);\n  }\n\n  addProjectile(x1, y1, deltaX, deltaY) {\n    this.projectiles\n      .push(\n        new _Projectile_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n          new _Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](x1, y1),\n          new _Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](deltaX, deltaY)\n        )\n      );\n  }\n\n  computeCollisions() {\n    let newProjectiles = [];\n    let visited = new Set();\n    this.projectiles.forEach((cur, index) => {\n      //See if this particle has already been processed\n      if (!visited.has(index)) {\n\n        //Attempt to find a second particle to collide with\n        let idx = this.projectiles.findIndex(target => \n          (_Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"].minus(cur.position, target.position)\n            .toPolar()\n            .magnitude < 5\n            &&\n            cur != target\n          )\n        ); \n        let target = this.projectiles[idx];\n\n        //Merge both particles, or simply add the first \n        //if no second is found\n        if (idx == -1) {\n          newProjectiles.push(cur);\n        } else {\n          newProjectiles.push(\n            _Projectile_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].computeCollision(cur, target)\n            /*\n            new Projectile(\n              cur.position, \n              new Vec(0,0),\n              +target.mass + +cur.mass\n            )\n            */\n          );\n          visited.add(idx);\n        }\n\n        visited.add(index);\n      }\n    });\n\n    // fuck javascript\n    this.projectiles.length = 0;\n    this.projectiles.push(...newProjectiles);\n  }\n\n  //Future: Add logic for collisions and other projectile types\n}\n\n\n//# sourceURL=webpack:///./src/State.js?");
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Projectile_1 = __webpack_require__(/*! ./Projectile */ "./src/Projectile.ts");
+const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+class State {
+    constructor(projectiles) {
+        this.projectiles = projectiles;
+    }
+    update(elapsedTime) {
+        let projs = JSON.parse(JSON.stringify(this.projectiles));
+        this.projectiles.forEach((proj, index) => {
+            proj.integrate(elapsedTime, projs);
+        });
+        this.computeCollisions();
+        return new State(this.projectiles);
+    }
+    draw(cx, cameraPosition) {
+        this.projectiles.forEach(proj => {
+            proj.draw(cx, cameraPosition);
+        });
+    }
+    add(proj) {
+        this.projectiles.push(proj);
+    }
+    addProjectile(x1, y1, deltaX, deltaY) {
+        this.projectiles
+            .push(new Projectile_1.default(Vec_1.default(x1, y1), Vec_1.default(deltaX, deltaY)));
+    }
+    computeCollisions() {
+        let newProjectiles = [];
+        let visited = new Set();
+        this.projectiles.forEach((cur, index) => {
+            //See if this particle has already been processed
+            if (!visited.has(index)) {
+                //Attempt to find a second particle to collide with
+                let idx = this.projectiles.findIndex(target => (cur.position.minus(target.position)
+                    .toPolar()
+                    .magnitude < 5
+                    &&
+                        cur != target));
+                let target = this.projectiles[idx];
+                //Merge both particles, or simply add the first 
+                //if no second is found
+                if (idx == -1) {
+                    newProjectiles.push(cur);
+                }
+                else {
+                    newProjectiles.push(Projectile_1.default.computeCollision(cur, target)
+                    /*
+                    new Projectile(
+                      cur.position,
+                      Vec(0,0),
+                      +target.mass + +cur.mass
+                    )
+                    */
+                    );
+                    visited.add(idx);
+                }
+                visited.add(index);
+            }
+        });
+        // fuck javascript
+        this.projectiles.length = 0;
+        this.projectiles.push(...newProjectiles);
+    }
+}
+exports.default = State;
+
 
 /***/ }),
 
-/***/ "./src/Vec.js":
+/***/ "./src/Vec.ts":
 /*!********************!*\
-  !*** ./src/Vec.js ***!
+  !*** ./src/Vec.ts ***!
   \********************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return Vec; });\nclass Vec {\n  constructor(x, y) {\n    this.x = x;\n    this.y = y;\n  }\n\n  toPolar() {\n    return {\n      magnitude: Math.hypot(this.x, this.y),\n      angle: Math.atan2(this.y, this.x)\n    };\n  }\n\n  static fromPolar(mag, angle) {\n    return new Vec(\n      mag * Math.cos(angle),\n      mag * Math.sin(angle)\n    );\n  }\n\n  static plus(vec1, vec2) {\n    return new Vec(\n      vec1.x + vec2.x,\n      vec1.y + vec2.y\n    );\n  }\n\n  static minus(vec1, vec2) {\n    return new Vec(\n      vec1.x - vec2.x,\n      vec1.y - vec2.y\n    );\n  }\n\n  static times(vec, scalar) {\n    return new Vec(\n      vec.x * scalar,\n      vec.y * scalar\n    );\n  }\n}\n\n\n//# sourceURL=webpack:///./src/Vec.js?");
+
+// export default class Vec {
+//   x: number;
+//   y: number;
+//   constructor(x: number, y: number) {
+//     this.x = x;
+//     this.y = y;
+//   }
+Object.defineProperty(exports, "__esModule", { value: true });
+//   toPolar() {
+//     return {
+//       magnitude: Math.hypot(this.x, this.y),
+//       angle: Math.atan2(this.y, this.x)
+//     };
+//   }
+//   static fromPolar(mag: number, angle: number) {
+//     return new Vec(
+//       mag * Math.cos(angle),
+//       mag * Math.sin(angle)
+//     );
+//   }
+//   static plus(vec1: Vec, vec2: Vec) {
+//     return new Vec(
+//       vec1.x + vec2.x,
+//       vec1.y + vec2.y
+//     );
+//   }
+//   static minus(vec1: Vec, vec2: Vec) {
+//     return new Vec(
+//       vec1.x - vec2.x,
+//       vec1.y - vec2.y
+//     );
+//   }
+//   static times(vec: Vec, scalar: number) {
+//     return new Vec(
+//       vec.x * scalar,
+//       vec.y * scalar
+//     );
+//   }
+// }
+class Vec {
+    constructor(x, y, isPolar) {
+        if (!(this instanceof Vec)) {
+            return new Vec(...arguments);
+        }
+        if (x === undefined) {
+            this.x = 0;
+            this.y = 0;
+            return;
+        }
+        if (isPolar) {
+            // x = magnitude, y = angle
+            this.x = x * Math.cos(y);
+            this.y = x * Math.sin(y);
+            return;
+        }
+        this.x = x;
+        this.y = y;
+    }
+    toPolar() {
+        return {
+            magnitude: Math.hypot(this.x, this.y),
+            angle: Math.atan2(this.y, this.x)
+        };
+    }
+    get magnitude() {
+        return this.toPolar().magnitude;
+    }
+    get angle() {
+        return this.toPolar().angle;
+    }
+    get degrees() {
+        return this.angle / Math.PI * 180;
+    }
+    //TODO: Rewrite this so it's not its own method... 
+    //It should be part of the constructor.
+    /*
+    static fromPolar(mag, angle) {
+      return new Vec(
+        mag * Math.cos(angle),
+        mag * Math.sin(angle)
+      );
+    }
+    */
+    normalize() {
+        return this.times(1 / this.magnitude);
+    }
+    plus(v) {
+        return new Vec(this.x + v.x, this.y + v.y);
+    }
+    minus(v) {
+        return new Vec(this.x - v.x, this.y - v.y);
+    }
+    times(scalar) {
+        return new Vec(this.x * scalar, this.y * scalar);
+    }
+    dot(v) {
+        return this.x * v.x + this.y * v.y;
+    }
+    cross(v) {
+        return this.x * v.y - this.y * v.x;
+    }
+    rotateAround(a, point) {
+        let { magnitude, angle } = this.minus(point).toPolar();
+        angle += a;
+        return (new Vec(magnitude, angle, true)).plus(point);
+    }
+    rotate(a) {
+        if (Math.abs(a) > 2 * Math.PI)
+            console.log('Check to see if your rotations are in radians');
+        let { magnitude, angle } = this.toPolar();
+        angle += a;
+        return new Vec(magnitude, angle, true);
+    }
+    proj(v) {
+        let vhat = v.normalize();
+        return vhat.times(this.dot(vhat));
+    }
+}
+let Vector = function (...args) { return new Vec(...args); };
+exports.default = Vector;
+
 
 /***/ }),
 
-/***/ "./src/app.js":
-/*!********************!*\
-  !*** ./src/app.js ***!
-  \********************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _Projectile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Projectile.js */ \"./src/Projectile.js\");\n/* harmony import */ var _Vec_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vec.js */ \"./src/Vec.js\");\n/* harmony import */ var _ui_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ui.js */ \"./src/ui.js\");\n/* harmony import */ var _State_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./State.js */ \"./src/State.js\");\n/* harmony import */ var _Input_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Input.js */ \"./src/Input.js\");\n\n\n\n\n\n\n\nlet state;\nlet canvas = document.getElementById('canvas');\nlet input;\n\nfunction animate() {\n  state = new _State_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"]([]);\n  input = new _Input_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"](canvas, state);\n  let cameraShift = new _Vec_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](0, 0);\n  let cx = canvas.getContext('2d');\n  let start;\n  let prevTime;\n\n  function draw(timestamp) {\n    cx.fillRect(0, 0, canvas.width, canvas.height);\n    let elapsedTime = 1/60;\n\n    //Draw blue input line\n    input.drawInput();\n    \n    //Updating state more granularly allows for better physics.\n    state = state.update(elapsedTime / 4);\n    state = state.update(elapsedTime / 4);\n    state = state.update(elapsedTime / 4);\n    state = state.update(elapsedTime / 4);\n    state.draw(cx, input.getCameraPosition());\n\n    //Set up next frame\n    prevTime = timestamp; //store time for next frame\n    requestAnimationFrame(draw);\n  }\n  requestAnimationFrame(draw);\n  \n}\n\nObject(_ui_js__WEBPACK_IMPORTED_MODULE_2__[\"addButtons\"])();\nanimate();\n\n\n//# sourceURL=webpack:///./src/app.js?");
+/*jshint globalstrict:false */
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+const ui_1 = __webpack_require__(/*! ./ui */ "./src/ui.ts");
+const State_1 = __webpack_require__(/*! ./State */ "./src/State.ts");
+const Input_1 = __webpack_require__(/*! ./Input */ "./src/Input.ts");
+let state;
+let canvas = document.querySelector('#canvas');
+let input;
+ui_1.addButtons();
+function animate() {
+    state = new State_1.default([]);
+    input = new Input_1.default(canvas, state, document.querySelector('#mass'));
+    let cx = canvas.getContext('2d');
+    function draw(_timestamp) {
+        canvas.height = canvas.height;
+        cx.save();
+        input.setTransform();
+        let { x, y } = input.getTransform();
+        cx.fillRect(-x, -y, canvas.width, canvas.height);
+        let elapsedTime = 1 / 60;
+        //Draw blue input line
+        input.drawInput();
+        //Updating state more granularly allows for better physics.
+        state = state.update(elapsedTime / 4);
+        state = state.update(elapsedTime / 4);
+        state = state.update(elapsedTime / 4);
+        state = state.update(elapsedTime / 4);
+        state.draw(cx, Vec_1.default());
+        cx.restore();
+        requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+}
+animate();
+
 
 /***/ }),
 
-/***/ "./src/ui.js":
+/***/ "./src/ui.ts":
 /*!*******************!*\
-  !*** ./src/ui.js ***!
+  !*** ./src/ui.ts ***!
   \*******************/
-/*! exports provided: addButtons, translate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"addButtons\", function() { return addButtons; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\nfunction addButtons () {\n  let massControl = document.getElementById('mass-control');\n\n  function button(val) {\n    let button = document.createElement('button');\n    button.textContent = val;\n    massControl.appendChild(button);\n    button.addEventListener('click', () => {\n      document.getElementById('mass').value = val;\n    });\n  }\n  button(10);\n  button(50);\n  button(100);\n  button(200);\n  button(500);\n  button(750);\n  button(1000);\n}\n\nfunction translate (cx) {\n  document.addEventListener('mousedown', function(event) {\n    let startX = event.offsetX;\n    let startY = event.offsetY;\n\n    function handleTranslate (event) {\n      if (event.ctrlKey /*ctrl key is pressed*/) {\n        let curX = event.offsetX;\n        let curY = event.offsetY;\n        //translate page\n        cx.transform(0,0,0,0,curX-startX,curY-startY);\n      }\n    }\n    document.addEventListener('mousemove', handleTranslate);\n\n    document.addEventListener('mouseup', () => {\n      document.removeEventListener('mousemove', handleTranslate);\n    });\n  });\n}\n\n\n\n//# sourceURL=webpack:///./src/ui.js?");
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function addButtons() {
+    let massControl = document.getElementById('mass-control');
+    function button(val) {
+        let button = document.createElement('button');
+        button.textContent = val;
+        massControl.appendChild(button);
+        button.addEventListener('click', () => {
+            document.querySelector('#mass').value = val;
+        });
+    }
+    button("10");
+    button("50");
+    button("100");
+    button("200");
+    button("500");
+    button("750");
+    button("1000");
+}
+exports.addButtons = addButtons;
+function translate(cx) {
+    document.addEventListener('mousedown', function (event) {
+        let startX = event.offsetX;
+        let startY = event.offsetY;
+        function handleTranslate(event) {
+            if (event.ctrlKey /*ctrl key is pressed*/) {
+                let curX = event.offsetX;
+                let curY = event.offsetY;
+                //translate page
+                cx.transform(0, 0, 0, 0, curX - startX, curY - startY);
+            }
+        }
+        document.addEventListener('mousemove', handleTranslate);
+        document.addEventListener('mouseup', () => {
+            document.removeEventListener('mousemove', handleTranslate);
+        });
+    });
+}
+exports.translate = translate;
+
 
 /***/ })
 
 /******/ });
+//# sourceMappingURL=main.js.map

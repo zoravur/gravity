@@ -1,11 +1,26 @@
 // This class requires a canvas and a state of projectiles as references.
 // It sets up event handlers. Currently it can't add non 100 mass particles.
 
-import Projectile from './Projectile.js';
-import Vec from './Vec.js';
+import Projectile from './Projectile';
+import Vec from './Vec';
+import State from './State';
 
 export default class Input {
-  constructor(canv, state) {
+  clickAndDrag: {};
+  started: boolean;
+  ended: boolean;
+  state: State;
+  canv: HTMLCanvasElement
+  camX: number;
+  camY: number;
+  dCamX: number;
+  dCamY: number;
+  shiftingCamera: boolean;
+  startX: any;
+  startY: any;
+  endX: any;
+  endY: any;
+  constructor(canv: HTMLCanvasElement, state: State) {
     console.log('construct');
     this.clickAndDrag = {};
     this.started = false;
@@ -38,7 +53,7 @@ export default class Input {
     }
   }
 
-  handleMouseUp(event) {
+  handleMouseUp(event: MouseEvent) {
     //if (event.shiftKey) {
 
     //} else {
@@ -47,10 +62,10 @@ export default class Input {
       let endX = event.offsetX;
       let endY = event.offsetY;
       let proj = new Projectile(
-        new Vec(this.startX - this.camX, this.startY - this.camY),
-        new Vec(endX - this.startX, endY - this.startY)
+        Vec(this.startX - this.camX, this.startY - this.camY),
+        Vec(endX - this.startX, endY - this.startY)
       );
-      proj.mass = document.getElementById('mass').value;
+      proj.mass = Number(document.querySelector<HTMLInputElement>('#mass').value);
 
       this.state.add(proj);
       this.startX = undefined;
@@ -63,10 +78,10 @@ export default class Input {
     this.camY += this.dCamY;
     this.dCamX = 0;
     this.dCamY = 0;
-    //}
+    
   }
 
-  handleMouseDown(event) {
+  handleMouseDown(event: MouseEvent) {
     if (event.shiftKey) {
       this.shiftingCamera = true;
       this.startX = event.offsetX;
@@ -78,7 +93,7 @@ export default class Input {
     }
   }
 
-  handleMouseDrag(event) {
+  handleMouseDrag(event: MouseEvent) {
     if (event.shiftKey && this.shiftingCamera) {
       this.dCamX = event.offsetX - this.startX;
       this.dCamY = event.offsetY - this.startY;

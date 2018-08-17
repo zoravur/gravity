@@ -1,41 +1,43 @@
-import Projectile from './Projectile.js';
-import Vec from './Vec.js';
+import Projectile from './Projectile';
+import Vec from './Vec';
 
 export default class State {
-  constructor(projectiles) {
+  projectiles: Projectile[];
+  constructor(projectiles: Projectile[]) {
     this.projectiles = projectiles;
   }
 
-  update(elapsedTime) {
-    this.projectiles.forEach(proj => {
-      proj.integrate(elapsedTime, this.projectiles);
+  update(elapsedTime: number) {
+    let projs = JSON.parse(JSON.stringify(this.projectiles));
+    this.projectiles.forEach((proj, index) => {
+      proj.integrate(elapsedTime, projs);
     });
     this.computeCollisions();
     return new State(this.projectiles);
   }
 
-  draw(cx, cameraPosition) {
+  draw(cx: CanvasRenderingContext2D, cameraPosition: { x: number; y: number; }) {
     this.projectiles.forEach(proj => {
       proj.draw(cx, cameraPosition);
     });
   }
 
-  add(proj) {
+  add(proj: Projectile) {
     this.projectiles.push(proj);
   }
 
-  addProjectile(x1, y1, deltaX, deltaY) {
+  addProjectile(x1: number, y1: number, deltaX: number, deltaY: number) {
     this.projectiles
       .push(
         new Projectile(
-          new Vec(x1, y1),
-          new Vec(deltaX, deltaY)
+          Vec(x1, y1),
+          Vec(deltaX, deltaY)
         )
       );
   }
 
   computeCollisions() {
-    let newProjectiles = [];
+    let newProjectiles: any[] = [];
     let visited = new Set();
     this.projectiles.forEach((cur, index) => {
       //See if this particle has already been processed
@@ -43,7 +45,7 @@ export default class State {
 
         //Attempt to find a second particle to collide with
         let idx = this.projectiles.findIndex(target => 
-          (Vec.minus(cur.position, target.position)
+          (cur.position.minus(target.position)
             .toPolar()
             .magnitude < 5
             &&
@@ -62,7 +64,7 @@ export default class State {
             /*
             new Projectile(
               cur.position, 
-              new Vec(0,0),
+              Vec(0,0),
               +target.mass + +cur.mass
             )
             */
