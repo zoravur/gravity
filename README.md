@@ -1,4 +1,5 @@
 # projectiles
+
 Projectiles with gravity
 
 This is a simple 2d gravity simulation written with javascript, inspired by [nowykurier.com](http://www.nowykurier.com/toys/gravity/gravity.html).

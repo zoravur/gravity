@@ -1,53 +1,9 @@
-// export default class Vec {
-//   x: number;
-//   y: number;
-//   constructor(x: number, y: number) {
-//     this.x = x;
-//     this.y = y;
-//   }
-
-//   toPolar() {
-//     return {
-//       magnitude: Math.hypot(this.x, this.y),
-//       angle: Math.atan2(this.y, this.x)
-//     };
-//   }
-
-//   static fromPolar(mag: number, angle: number) {
-//     return new Vec(
-//       mag * Math.cos(angle),
-//       mag * Math.sin(angle)
-//     );
-//   }
-
-//   static plus(vec1: Vec, vec2: Vec) {
-//     return new Vec(
-//       vec1.x + vec2.x,
-//       vec1.y + vec2.y
-//     );
-//   }
-
-//   static minus(vec1: Vec, vec2: Vec) {
-//     return new Vec(
-//       vec1.x - vec2.x,
-//       vec1.y - vec2.y
-//     );
-//   }
-
-//   static times(vec: Vec, scalar: number) {
-//     return new Vec(
-//       vec.x * scalar,
-//       vec.y * scalar
-//     );
-//   }
-// }
-
-class Vec{
+class Vector{
   x: number;
   y: number;
   constructor(x?: number, y?: number, isPolar?: boolean) {
-    if (!(this instanceof Vec)) {
-      return new Vec(...arguments);
+    if (!(this instanceof Vector)) {
+      return new Vector(...arguments);
     }
     if (x === undefined) {
       this.x = 0;
@@ -83,37 +39,26 @@ class Vec{
     return this.angle / Math.PI * 180;
   }
 
-  //TODO: Rewrite this so it's not its own method... 
-  //It should be part of the constructor.
-  /*
-  static fromPolar(mag, angle) {
-    return new Vec(
-      mag * Math.cos(angle),
-      mag * Math.sin(angle)
-    );
-  }
-  */
-
   normalize() {
     return this.times(1/this.magnitude);
   }
 
   plus(v) {
-    return new Vec(
+    return new Vector(
       this.x + v.x,
       this.y + v.y
     );
   }
 
   minus(v) {
-    return new Vec(
+    return new Vector(
       this.x - v.x,
       this.y - v.y
     );
   }
 
   times(scalar) {
-    return new Vec(
+    return new Vector(
       this.x * scalar,
       this.y * scalar
     );
@@ -130,14 +75,14 @@ class Vec{
   rotateAround(a, point) {
     let {magnitude, angle} = this.minus(point).toPolar();
     angle += a;
-    return (new Vec(magnitude, angle, true)).plus(point);
+    return (new Vector(magnitude, angle, true)).plus(point);
   }
 
   rotate(a) {
     if (Math.abs(a) > 2 * Math.PI) console.log('Check to see if your rotations are in radians');
     let {magnitude, angle} = this.toPolar();
     angle += a;
-    return new Vec(magnitude, angle, true);
+    return new Vector(magnitude, angle, true);
   }
 
   proj(v) {
@@ -146,5 +91,7 @@ class Vec{
   }
 }
 
-let Vector = function(...args) { return new Vec(...args); };
-export default Vector;
+let Vec = function(x?, y?, isPolar?): Vector { return new Vector(x, y, isPolar); };
+export default Vec;
+
+export { Vector };

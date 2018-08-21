@@ -24,7 +24,7 @@ export default class Input {
         canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
     }
 
-    bindState(state) {
+    bindState(state: State) {
         return function addProjectile(proj) {
             state.add(proj);
         }

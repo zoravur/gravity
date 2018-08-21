@@ -1,6 +1,6 @@
 import Vec from './Vec';
 declare let require;
-const interpolate: any = require('color-interpolate');
+import interpolate = require('color-interpolate');
 
 const bigG = -1;
 
@@ -23,8 +23,8 @@ class Projectile {
   }
 
   computeColor () {
-    let colormap = interpolate(['white', 'orange', 'red']);
-    return colormap(Math.log10(this.mass)/4);
+    let colormap = interpolate(['white', 'brown', 'orange', 'red']);
+    return colormap(Math.log10(Math.max(this.mass, 1))/4);
   }
 
   updateAcceleration (projectiles: Projectile[]) {
@@ -58,21 +58,23 @@ class Projectile {
     // a = (v2 - v1) / t => v2 = v1 + at
     this.velocity = this.velocity.plus(avgAcceleration.times(elapsedTime));
 
+    //return new Projectile(this.position, this.velocity, this.mass);
+    return this;
   }
 
-  draw(cx: CanvasRenderingContext2D, C) {
+  draw(cx: CanvasRenderingContext2D) {
     cx.save();
     //cx.translate(0.5, 0.5);
 
 
     cx.fillStyle = cx.strokeStyle = this.computeColor();
     cx.beginPath();
-    cx.arc(this.position.x + C.x, this.position.y + C.y, (Math.log(Math.abs(this.mass))+2)/1.5, 0, 2*Math.PI);
+    cx.arc(this.position.x, this.position.y, (Math.log(Math.abs(this.mass))+2)/1.5, 0, 2*Math.PI);
     cx.fill();
     cx.beginPath();
-    cx.moveTo(this.position.x + C.x, this.position.y + C.y);
-    let endPoint = this.position.plus( this.velocity);
-    cx.lineTo(endPoint.x + C.x, endPoint.y + C.y);
+    cx.moveTo(this.position.x, this.position.y);
+    let endPoint = this.position.plus(this.velocity);
+    cx.lineTo(endPoint.x, endPoint.y);
     cx.stroke();
 
     cx.restore();

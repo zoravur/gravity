@@ -6,9 +6,14 @@ import Vec from './Vec';
 import { addButtons } from './ui';
 import State from './State';
 import Input from './Input';
+import FrameCount from './FrameCounter';
+import { render } from './View';
+import 'normalize.css';
+
 
 let state: State;
 let canvas: HTMLCanvasElement = document.querySelector('#canvas');
+FrameCount(canvas);
 let input: Input;
 
 addButtons();
@@ -18,7 +23,7 @@ function animate() {
   input = new Input(canvas, state, document.querySelector('#mass'));
   let cx = canvas.getContext('2d');
 
-  function draw(_timestamp?: number) {
+  function loop(_timestamp?: number) {
     canvas.height = canvas.height;
     cx.save();
 
@@ -32,18 +37,18 @@ function animate() {
     input.drawInput();
     
     //Updating state more granularly allows for better physics.
-    state = state.update(elapsedTime / 4);
-    state = state.update(elapsedTime / 4);
-    state = state.update(elapsedTime / 4);
-    state = state.update(elapsedTime / 4);
-    state.draw(cx, Vec());
+    state.update(elapsedTime);
+    
+    
+    render(canvas, state);
     
     cx.restore();
 
-    requestAnimationFrame(draw);
+    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(draw);
+  requestAnimationFrame(loop);
   
 }
 
+addEventListener('dblclick', () => console.log(state));
 animate();

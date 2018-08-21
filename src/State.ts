@@ -1,29 +1,60 @@
 import Projectile from './Projectile';
-import Vec from './Vec';
+import Vec, { Vector } from './Vec';
 
+export interface ProjectilePath {
+  id: number;
+  mass: number;
+  path: Vector[];
+}
 export default class State {
   projectiles: Projectile[];
+  history: ProjectilePath[];
   constructor(projectiles: Projectile[]) {
     this.projectiles = projectiles;
+    this.history = [];
+  }
+
+  _savePath() {
+
+    // this.history.push(this.projectiles.map(
+    //   proj => ({
+    //     position: proj.position, 
+    //     mass: proj.mass
+    //   })
+    // ));
+
+    this.projectiles.forEach(proj => {
+      let idx = this.history.findIndex(path => proj.id === path.id);
+      if (idx === -1) {
+        this.history.push({id: proj.id, mass: proj.mass, path: [proj.position]});
+      } else this.history[idx].path.push(proj.position);
+    })
+
+    //history should be an array of TRAJECTORIES, which show how a path changed over time.
+    //For each of the current projectiles, see if they match a history, and if so, add them to the path.
+
   }
 
   update(elapsedTime: number) {
-    let projs = JSON.parse(JSON.stringify(this.projectiles));
-    this.projectiles.forEach((proj, index) => {
-      proj.integrate(elapsedTime, projs);
-    });
-    this.computeCollisions();
-    return new State(this.projectiles);
+
+    this.projectiles = this.projectiles.map(
+      (proj, _, arr) => proj.integrate(elapsedTime, arr)
+    );
+    this._computeCollisions();
+    this._savePath();
+    return this;
   }
 
-  draw(cx: CanvasRenderingContext2D, cameraPosition: { x: number; y: number; }) {
+  draw(cx: CanvasRenderingContext2D) {
     this.projectiles.forEach(proj => {
-      proj.draw(cx, cameraPosition);
+      proj.draw(cx);
     });
+    return this;
   }
 
   add(proj: Projectile) {
     this.projectiles.push(proj);
+    return this;
   }
 
   addProjectile(x1: number, y1: number, deltaX: number, deltaY: number) {
@@ -34,52 +65,19 @@ export default class State {
           Vec(deltaX, deltaY)
         )
       );
+    return this;
   }
 
-  computeCollisions() {
-    let newProjectiles: any[] = [];
-    let visited = new Set();
-    this.projectiles.forEach((cur, index) => {
-      //See if this particle has already been processed
-      if (!visited.has(index)) {
-
-        //Attempt to find a second particle to collide with
-        let idx = this.projectiles.findIndex(target => 
-          (cur.position.minus(target.position)
-            .toPolar()
-            .magnitude < 5
-            &&
-            cur != target
-          )
-        ); 
-        let target = this.projectiles[idx];
-
-        //Merge both particles, or simply add the first 
-        //if no second is found
-        if (idx == -1) {
-          newProjectiles.push(cur);
-        } else {
-          newProjectiles.push(
-            Projectile.computeCollision(cur, target)
-            /*
-            new Projectile(
-              cur.position, 
-              Vec(0,0),
-              +target.mass + +cur.mass
-            )
-            */
-          );
-          visited.add(idx);
-        }
-
-        visited.add(index);
+  _computeCollisions() {
+    return this.projectiles = this.projectiles.reduce((projs: Projectile[], cur: Projectile) => {
+      let idx = projs.findIndex(other => cur.position.minus(other.position).magnitude < 5);
+      if (idx === -1) {
+        projs.push(cur);
+        return projs;
       }
-    });
-
-    // fuck javascript
-    this.projectiles.length = 0;
-    this.projectiles.push(...newProjectiles);
+      projs[idx] = Projectile.computeCollision(projs[idx], cur);
+      return projs;
+    }, []);
   }
 
-  //Future: Add logic for collisions and other projectile types
 }
