@@ -29596,47 +29596,6 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/FrameCounter.ts":
-/*!*****************************!*\
-  !*** ./src/FrameCounter.ts ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
-let previous = performance.now();
-let counter = 0;
-function FrameCount(canvas, offset = Vec_1.default(10, 10), size = Vec_1.default(100, 20)) {
-    let animate = window.requestAnimationFrame;
-    let cx = canvas.getContext('2d');
-    const width = 1;
-    let frames = Array.apply(null, Array(5)).map(() => 0);
-    window.requestAnimationFrame = function (callback) {
-        let delta = performance.now() - previous;
-        previous += delta;
-        let column = counter++ % (size.x / width);
-        frames[column] = delta;
-        cx.save();
-        cx.strokeStyle = 'white';
-        cx.strokeRect(offset.x, offset.y, size.x, size.y);
-        cx.beginPath();
-        frames.forEach((col, idx) => {
-            cx.moveTo(idx * width + offset.x, size.y + offset.y);
-            cx.lineTo(idx * width + offset.x, size.y + offset.y - col);
-        });
-        cx.stroke();
-        cx.restore();
-        return animate(callback);
-    };
-}
-exports.default = FrameCount;
-
-
-/***/ }),
-
 /***/ "./src/Input.ts":
 /*!**********************!*\
   !*** ./src/Input.ts ***!
@@ -30019,25 +29978,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ui_1 = __webpack_require__(/*! ./ui */ "./src/ui.ts");
 const State_1 = __webpack_require__(/*! ./State */ "./src/State.ts");
 const Input_1 = __webpack_require__(/*! ./Input */ "./src/Input.ts");
-const FrameCounter_1 = __webpack_require__(/*! ./FrameCounter */ "./src/FrameCounter.ts");
+//import FrameCount from './FrameCounter';
 const View_1 = __webpack_require__(/*! ./View */ "./src/View.ts");
 __webpack_require__(/*! normalize.css */ "./node_modules/normalize.css/normalize.css");
 let state;
 let canvas = document.querySelector('#canvas');
-FrameCounter_1.default(canvas);
+//FrameCount(canvas);
 let input;
 ui_1.addButtons();
 function animate() {
     state = new State_1.default([]);
     input = new Input_1.default(canvas, state, document.querySelector('#mass'));
     let cx = canvas.getContext('2d');
+    let previous = performance.now();
     function loop(_timestamp) {
         canvas.height = canvas.height;
         cx.save();
         input.setTransform();
         let { x, y } = input.getTransform();
         cx.fillRect(-x, -y, canvas.width, canvas.height);
-        let elapsedTime = 1 / 60;
+        let elapsedTime = (_timestamp - previous) / 1000; //elapsed time in seconds
+        previous = _timestamp;
         //Draw blue input line
         input.drawInput();
         //Updating state more granularly allows for better physics.
