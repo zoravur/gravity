@@ -5,13 +5,48 @@
   	<title>yay</title>
   </head>
   <body>
-  	<canvas id="canvas" style="border: 1px solid rgb(0, 0, 0);" width=1000 height=700>
-  	</canvas><br/>
-	<div id="mass-control">
-	  <label>Set default mass
-			<input id="mass" type="number" value="50"/>
-	  </label>
-	</div>
+		<div id="graphics">
+			<canvas id="fg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 1;" width=1000 height=700></canvas>
+			<canvas id="bg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 0;" width=1000 height=700>
+			</canvas><br/>
+		</div>
+		<div id="controls" style="margin-top: 700px;">
+			<div id="mass-control">
+				<label>Set default mass
+					<input id="mass" type="number" value="50"/>
+				</label>
+			</div>
+			<label>Set bigG
+				<input id="big-g-control" type="number" value="-50"/>
+			</label>
+			<label>Set inverse degree dimension (i.e. n in Gmm/r^n)
+				<input id="inverse-degree-control" type="number" value="2" step="0.1"/>
+			</label>
+
+			<label>
+					<input id="pause" type="checkbox" />Pause
+			</label>
+			<label>
+					<input id="paths" type="checkbox" checked/>Paths
+			</label>
+			<label>
+					<input id="velocity-arrow" type="checkbox" />Show velocities
+			</label>
+			<label>
+					<input id="acceleration-arrow" type="checkbox"/>Show acceleration
+			</label>
+			<select id="integration">
+				<optgroup label="Symplectic">
+					<option value="implicit-euler">Implicit Euler</option>
+					<option value="verlet" selected="selected">Verlet</option>
+				</optgroup>
+				<optgroup label="Not-sympletic (everything breaks)">
+					<option value="euler">Euler</option>
+					<option value="RK4">Runge Kutta 4th order</option>
+				</optgroup>
+			</select>
+
+		</div>
 	<script src="main.js"></script>
   </body>
 </html>

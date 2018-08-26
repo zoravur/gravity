@@ -9,11 +9,11 @@ export default class Input {
     camera: any;
     canvas: HTMLCanvasElement;
     cx: CanvasRenderingContext2D;
-    massField: HTMLInputElement;
+    options;
     
-    constructor(canvas: HTMLCanvasElement, state: State, massField: HTMLInputElement) {
+    constructor(canvas: HTMLCanvasElement, state: State, options) {
         this.drawInput = () => {};
-        this.massField = massField;
+        this.options = options;
         this.canvas = canvas;
         this.cx = canvas.getContext('2d');
         this.addProjectile = this.bindState(state);
@@ -91,7 +91,7 @@ export default class Input {
             end = end.minus(this.camera.position);
             this.drawInput = () => {};
             let delta = end.minus(startVec);
-            this.addProjectile(new Projectile(startVec, delta, +this.massField.value));
+            this.addProjectile(new Projectile(startVec, delta, this.options.projectileMass));
 
             canvas.removeEventListener('mousemove', moveHandle);
             canvas.removeEventListener('mouseup', upHandle);

@@ -1,6 +1,6 @@
 import Projectile from './Projectile';
 import Vec, { Vector } from './Vec';
-
+import options from './Options';
 export interface ProjectilePath {
   id: number;
   mass: number;
@@ -15,31 +15,36 @@ export default class State {
   }
 
   _savePath() {
-
-    // this.history.push(this.projectiles.map(
-    //   proj => ({
-    //     position: proj.position, 
-    //     mass: proj.mass
-    //   })
-    // ));
-
-    this.projectiles.forEach(proj => {
-      let idx = this.history.findIndex(path => proj.id === path.id);
-      if (idx === -1) {
-        this.history.push({id: proj.id, mass: proj.mass, path: [proj.position]});
-      } else this.history[idx].path.push(proj.position);
-    })
-
-    //history should be an array of TRAJECTORIES, which show how a path changed over time.
-    //For each of the current projectiles, see if they match a history, and if so, add them to the path.
-
+    if (options.paths) {
+      this.projectiles.forEach(proj => {
+        let idx = this.history.findIndex(path => proj.id === path.id);
+        if (idx === -1) {
+          this.history.push({id: proj.id, mass: proj.mass, path: [proj.position]});
+        } else this.history[idx].path.push(proj.position);
+      })
+    } else {
+      this.history = [];
+    }
   }
 
   update(elapsedTime: number) {
+    let arr = JSON.parse(JSON.stringify(this.projectiles)); //XXX
 
-    this.projectiles = this.projectiles.map(
-      (proj, _, arr) => proj.integrate(elapsedTime, arr)
-    );
+    if (options.integration !== 'RK4') {
+      let integration = {
+        'verlet': Projectile.prototype.integrate,
+        'implicit-euler': Projectile.prototype.implicitEulerIntegrate,
+        'euler': Projectile.prototype.eulerIntegrate
+      }
+  
+      this.projectiles = this.projectiles.map(
+        (proj, _, /* arr */) => integration[options.integration].call(proj, elapsedTime, arr)
+      );
+    } else {
+      this.projectiles = Projectile.RK4Integrate(elapsedTime, this.projectiles);
+    }
+
+
     this._computeCollisions();
     this._savePath();
     return this;
@@ -53,7 +58,7 @@ export default class State {
   }
 
   add(proj: Projectile) {
-    this.projectiles.push(proj);
+    this.projectiles.splice(1, 0, proj);
     return this;
   }
 
@@ -69,6 +74,8 @@ export default class State {
   }
 
   _computeCollisions() {
+
+
     return this.projectiles = this.projectiles.reduce((projs: Projectile[], cur: Projectile) => {
       let idx = projs.findIndex(other => cur.position.minus(other.position).magnitude < 5);
       if (idx === -1) {

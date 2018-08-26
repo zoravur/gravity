@@ -9,6 +9,6 @@ export function addButtons () {
       document.querySelector<HTMLInputElement>('#mass').value = String(val);
     });
   }
-  [10, 100, 250, 500, 1000, 5000].map(button);
+  [1, 10, 100, 500, 1000, 2500, 5000, 10000, 50000, 100000].map(button);
 }
 

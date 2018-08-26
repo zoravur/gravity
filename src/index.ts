@@ -6,45 +6,53 @@ import Vec from './Vec';
 import { addButtons } from './ui';
 import State from './State';
 import Input from './Input';
-//import FrameCount from './FrameCounter';
+import options from './Options';
+import FrameCount from './FrameCounter';
 import { render } from './View';
 import 'normalize.css';
 
 
 let state: State;
-let canvas: HTMLCanvasElement = document.querySelector('#canvas');
-//FrameCount(canvas);
+let fg: HTMLCanvasElement = document.querySelector('#fg');
+let bg: HTMLCanvasElement = document.querySelector('#bg');
+FrameCount(bg);
 let input: Input;
 
 addButtons();
 
 function animate() {
   state = new State([]);
-  input = new Input(canvas, state, document.querySelector('#mass'));
-  let cx = canvas.getContext('2d');
+  input = new Input(fg, state, options);
+  let fgx = fg.getContext('2d');
+  let bgx = bg.getContext('2d');
   let previous = performance.now();
 
+  //fgx.clearRect(0,0,fg.width, fg.height);
+  bgx.fillStyle = 'black';
+  bgx.fillRect(0, 0, bg.width, bg.height);
+
   function loop(_timestamp?: number) {
-    canvas.height = canvas.height;
-    cx.save();
+    fg.height = fg.height;
+    fgx.save();
 
     input.setTransform();
 
-    let {x,y} = input.getTransform();
-    cx.fillRect(-x, -y, canvas.width, canvas.height);
-    let elapsedTime = (_timestamp - previous)/1000; //elapsed time in seconds
+    let elapsedTime = Math.min((_timestamp - previous)/1000, 2/60); //elapsed time in seconds
     previous = _timestamp;
 
     //Draw blue input line
     input.drawInput();
     
     //Updating state more granularly allows for better physics.
-    state.update(elapsedTime);
+    if (!options.pause) {
+      state.update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4);
+      
+    }
     
     
-    render(canvas, state);
+    render(fg, state);
     
-    cx.restore();
+    fgx.restore();
 
     requestAnimationFrame(loop);
   }

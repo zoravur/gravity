@@ -1,3 +1,5 @@
-Have to refactor code on client side. Fewer global variables. Use objects to manage state.
+# TODO
 
-For server side, need to then communicate data.
+Use scss to make view full screen
+~~Add acceleration vectors option, and make particle vectors optional~~
+Increase performance of integration methods (Runge kutta is crushing it)

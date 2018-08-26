@@ -29596,6 +29596,57 @@ module.exports = g;
 
 /***/ }),
 
+/***/ "./src/FrameCounter.ts":
+/*!*****************************!*\
+  !*** ./src/FrameCounter.ts ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+let previous = performance.now();
+let counter = 0;
+function FrameCount(canvas, offset = Vec_1.default(10, 10), size = Vec_1.default(100, 40)) {
+    let animate = window.requestAnimationFrame;
+    let cx = canvas.getContext('2d');
+    const width = 1;
+    let frames = Array.apply(null, Array(5)).map(() => 0);
+    window.requestAnimationFrame = function (callback) {
+        //console.log('hereee');
+        //console.log(canvas);
+        let delta = performance.now() - previous;
+        previous += delta;
+        let column = counter++ % (size.x / width);
+        frames[column] = delta;
+        //cx.save();
+        cx.strokeStyle = 'black';
+        cx.beginPath();
+        cx.moveTo(column * width + offset.x, size.y + offset.y);
+        cx.lineTo(column * width + offset.x, size.y + offset.y - 60);
+        cx.stroke();
+        //cx.beginPath();
+        // frames.forEach((col, idx) => {
+        //     cx.moveTo(idx*width + offset.x, size.y + offset.y);
+        //     cx.lineTo(idx*width + offset.x, size.y + offset.y - col);
+        // });
+        cx.strokeStyle = 'white';
+        cx.strokeRect(offset.x, offset.y, size.x, size.y);
+        cx.beginPath();
+        cx.moveTo(column * width + offset.x, size.y + offset.y);
+        cx.lineTo(column * width + offset.x, size.y + offset.y - delta);
+        cx.stroke();
+        //cx.restore();
+        return animate(callback);
+    };
+}
+exports.default = FrameCount;
+
+
+/***/ }),
+
 /***/ "./src/Input.ts":
 /*!**********************!*\
   !*** ./src/Input.ts ***!
@@ -29610,9 +29661,9 @@ const Projectile_1 = __webpack_require__(/*! ./Projectile */ "./src/Projectile.t
 const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
 'use strict';
 class Input {
-    constructor(canvas, state, massField) {
+    constructor(canvas, state, options) {
         this.drawInput = () => { };
-        this.massField = massField;
+        this.options = options;
         this.canvas = canvas;
         this.cx = canvas.getContext('2d');
         this.addProjectile = this.bindState(state);
@@ -29683,7 +29734,7 @@ class Input {
             end = end.minus(this.camera.position);
             this.drawInput = () => { };
             let delta = end.minus(startVec);
-            this.addProjectile(new Projectile_1.default(startVec, delta, +this.massField.value));
+            this.addProjectile(new Projectile_1.default(startVec, delta, this.options.projectileMass));
             canvas.removeEventListener('mousemove', moveHandle);
             canvas.removeEventListener('mouseup', upHandle);
         };
@@ -29691,6 +29742,46 @@ class Input {
     }
 }
 exports.default = Input;
+
+
+/***/ }),
+
+/***/ "./src/Options.ts":
+/*!************************!*\
+  !*** ./src/Options.ts ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = {
+    get projectileMass() {
+        return +(document.querySelector('#mass').value || 100);
+    },
+    get bigG() {
+        return +(document.querySelector('#big-g-control').value || -50);
+    },
+    get inverseDegree() {
+        return +(document.querySelector('#inverse-degree-control').value || 2);
+    },
+    get pause() {
+        return document.querySelector('#pause').checked;
+    },
+    get paths() {
+        return document.querySelector('#paths').checked;
+    },
+    get integration() {
+        return document.querySelector('#integration').value;
+    },
+    get accelerationArrow() {
+        return document.querySelector('#acceleration-arrow').checked;
+    },
+    get velocityArrow() {
+        return document.querySelector('#velocity-arrow').checked;
+    }
+};
 
 
 /***/ }),
@@ -29706,8 +29797,13 @@ exports.default = Input;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
 const interpolate = __webpack_require__(/*! color-interpolate */ "./node_modules/color-interpolate/index.js");
-const bigG = -1;
+//const bigG = -50;
+//const inverseDegree = 2;
+//If 2 dimensional, bigG is -1.
+//If 3 dimensional, biGG is -50.
+//If 4 dimensional, bigG is -500
 class Projectile {
     constructor(position, velocity, mass) {
         this.position = position;
@@ -29732,7 +29828,7 @@ class Projectile {
         }))
             .map(({ displacement, mass }) => Vec_1.default(
         /* Gmm/r^2 */
-        bigG * mass * this.mass / displacement.magnitude, displacement.angle, true // Is polar
+        Options_1.default.bigG * mass * this.mass / (Math.pow(displacement.magnitude, Options_1.default.inverseDegree)), displacement.angle, true // Is polar
         ))
             .reduce((total, cur) => total.plus(cur), Vec_1.default())
             .times(1 / this.mass);
@@ -29747,21 +29843,77 @@ class Projectile {
         let avgAcceleration = a_0.plus(this.acceleration).times(0.5);
         // a = (v2 - v1) / t => v2 = v1 + at
         this.velocity = this.velocity.plus(avgAcceleration.times(elapsedTime));
-        //return new Projectile(this.position, this.velocity, this.mass);
         return this;
+    }
+    implicitEulerIntegrate(h, projectiles) {
+        this.updateAcceleration(projectiles);
+        this.velocity = this.velocity.plus(this.acceleration.times(h));
+        this.position = this.position.plus(this.velocity.times(h));
+        return this;
+    }
+    eulerIntegrate(h, projectiles) {
+        this.updateAcceleration(projectiles);
+        this.position = this.position.plus(this.velocity.times(h));
+        this.velocity = this.velocity.plus(this.acceleration.times(h));
+        return this;
+    }
+    static RK4Integrate(h, projectiles) {
+        //Hope to ass this works
+        let v1 = projectiles.map(proj => proj.velocity);
+        let p1 = projectiles.map(proj => proj.position);
+        let a1 = projectiles.map(proj => proj.updateAcceleration(projectiles));
+        let v2 = v1.map((vel, i) => vel.plus(a1[i].times(h / 2)));
+        let p2 = p1.map((pos, i) => pos.plus(v1[i].times(h / 2)));
+        projectiles.forEach((proj, i) => { proj.position = p2[i]; });
+        let a2 = projectiles.map(proj => proj.updateAcceleration(projectiles));
+        let v3 = v2.map((vel, i) => vel.plus(a2[i].times(h / 2)));
+        let p3 = p2.map((pos, i) => pos.plus(v2[i].times(h / 2)));
+        projectiles.forEach((proj, i) => { proj.position = p3[i]; });
+        let a3 = projectiles.map(proj => proj.updateAcceleration(projectiles));
+        let v4 = v3.map((vel, i) => vel.plus(a3[i].times(h)));
+        let p4 = p3.map((pos, i) => pos.plus(v3[i].times(h)));
+        projectiles.forEach((proj, i) => { proj.position = p4[i]; });
+        let a4 = projectiles.map(proj => proj.updateAcceleration(projectiles));
+        projectiles.forEach((proj, i) => {
+            proj.acceleration = a1[i].plus(a2[i].times(2)).plus(a3[i].times(2)).plus(a4[i]).times(1 / 6);
+            proj.velocity = v1[i].plus(v2[i].times(2)).plus(v3[i].times(2)).plus(v4[i]).times(1 / 6);
+            proj.position = proj.position.plus(proj.velocity.times(h));
+            proj.velocity = proj.velocity.plus(proj.acceleration.times(h));
+        });
+        return projectiles;
     }
     draw(cx) {
         cx.save();
         //cx.translate(0.5, 0.5);
+        let arrow = (s, e) => {
+            cx.beginPath();
+            cx.moveTo(s.x, s.y);
+            cx.lineTo(e.x, e.y);
+            cx.stroke();
+            cx.beginPath();
+            cx.moveTo(e.x, e.y);
+            let { x, y } = e.minus(s).normalize().times(7).rotate(5 / 6 * Math.PI).plus(e);
+            //console.log(x,y);
+            cx.lineTo(x, y);
+            ({ x, y } = e.minus(s).normalize().times(7).rotate(-5 / 6 * Math.PI).plus(e));
+            cx.lineTo(x, y);
+            //console.log(x,y);
+            cx.closePath();
+            cx.fill();
+        };
         cx.fillStyle = cx.strokeStyle = this.computeColor();
         cx.beginPath();
         cx.arc(this.position.x, this.position.y, (Math.log(Math.abs(this.mass)) + 2) / 1.5, 0, 2 * Math.PI);
         cx.fill();
-        cx.beginPath();
-        cx.moveTo(this.position.x, this.position.y);
-        let endPoint = this.position.plus(this.velocity);
-        cx.lineTo(endPoint.x, endPoint.y);
-        cx.stroke();
+        if (Options_1.default.velocityArrow)
+            arrow(this.position, this.position.plus(this.velocity));
+        if (Options_1.default.accelerationArrow)
+            arrow(this.position, this.position.plus(this.acceleration));
+        // cx.beginPath();
+        // cx.moveTo(this.position.x, this.position.y);
+        // let endPoint = this.position.plus(this.velocity);
+        // cx.lineTo(endPoint.x, endPoint.y);
+        // cx.stroke();
         cx.restore();
     }
     static computeCollision(p1, p2) {
@@ -29788,31 +29940,40 @@ exports.default = Projectile;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Projectile_1 = __webpack_require__(/*! ./Projectile */ "./src/Projectile.ts");
 const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
+const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
 class State {
     constructor(projectiles) {
         this.projectiles = projectiles;
         this.history = [];
     }
     _savePath() {
-        // this.history.push(this.projectiles.map(
-        //   proj => ({
-        //     position: proj.position, 
-        //     mass: proj.mass
-        //   })
-        // ));
-        this.projectiles.forEach(proj => {
-            let idx = this.history.findIndex(path => proj.id === path.id);
-            if (idx === -1) {
-                this.history.push({ id: proj.id, mass: proj.mass, path: [proj.position] });
-            }
-            else
-                this.history[idx].path.push(proj.position);
-        });
-        //history should be an array of TRAJECTORIES, which show how a path changed over time.
-        //For each of the current projectiles, see if they match a history, and if so, add them to the path.
+        if (Options_1.default.paths) {
+            this.projectiles.forEach(proj => {
+                let idx = this.history.findIndex(path => proj.id === path.id);
+                if (idx === -1) {
+                    this.history.push({ id: proj.id, mass: proj.mass, path: [proj.position] });
+                }
+                else
+                    this.history[idx].path.push(proj.position);
+            });
+        }
+        else {
+            this.history = [];
+        }
     }
     update(elapsedTime) {
-        this.projectiles = this.projectiles.map((proj, _, arr) => proj.integrate(elapsedTime, arr));
+        let arr = JSON.parse(JSON.stringify(this.projectiles)); //XXX
+        if (Options_1.default.integration !== 'RK4') {
+            let integration = {
+                'verlet': Projectile_1.default.prototype.integrate,
+                'implicit-euler': Projectile_1.default.prototype.implicitEulerIntegrate,
+                'euler': Projectile_1.default.prototype.eulerIntegrate
+            };
+            this.projectiles = this.projectiles.map((proj, _) => integration[Options_1.default.integration].call(proj, elapsedTime, arr));
+        }
+        else {
+            this.projectiles = Projectile_1.default.RK4Integrate(elapsedTime, this.projectiles);
+        }
         this._computeCollisions();
         this._savePath();
         return this;
@@ -29824,7 +29985,7 @@ class State {
         return this;
     }
     add(proj) {
-        this.projectiles.push(proj);
+        this.projectiles.splice(1, 0, proj);
         return this;
     }
     addProjectile(x1, y1, deltaX, deltaY) {
@@ -29978,33 +30139,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ui_1 = __webpack_require__(/*! ./ui */ "./src/ui.ts");
 const State_1 = __webpack_require__(/*! ./State */ "./src/State.ts");
 const Input_1 = __webpack_require__(/*! ./Input */ "./src/Input.ts");
-//import FrameCount from './FrameCounter';
+const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
+const FrameCounter_1 = __webpack_require__(/*! ./FrameCounter */ "./src/FrameCounter.ts");
 const View_1 = __webpack_require__(/*! ./View */ "./src/View.ts");
 __webpack_require__(/*! normalize.css */ "./node_modules/normalize.css/normalize.css");
 let state;
-let canvas = document.querySelector('#canvas');
-//FrameCount(canvas);
+let fg = document.querySelector('#fg');
+let bg = document.querySelector('#bg');
+FrameCounter_1.default(bg);
 let input;
 ui_1.addButtons();
 function animate() {
     state = new State_1.default([]);
-    input = new Input_1.default(canvas, state, document.querySelector('#mass'));
-    let cx = canvas.getContext('2d');
+    input = new Input_1.default(fg, state, Options_1.default);
+    let fgx = fg.getContext('2d');
+    let bgx = bg.getContext('2d');
     let previous = performance.now();
+    //fgx.clearRect(0,0,fg.width, fg.height);
+    bgx.fillStyle = 'black';
+    bgx.fillRect(0, 0, bg.width, bg.height);
     function loop(_timestamp) {
-        canvas.height = canvas.height;
-        cx.save();
+        fg.height = fg.height;
+        fgx.save();
         input.setTransform();
-        let { x, y } = input.getTransform();
-        cx.fillRect(-x, -y, canvas.width, canvas.height);
-        let elapsedTime = (_timestamp - previous) / 1000; //elapsed time in seconds
+        let elapsedTime = Math.min((_timestamp - previous) / 1000, 2 / 60); //elapsed time in seconds
         previous = _timestamp;
         //Draw blue input line
         input.drawInput();
         //Updating state more granularly allows for better physics.
-        state.update(elapsedTime);
-        View_1.render(canvas, state);
-        cx.restore();
+        if (!Options_1.default.pause) {
+            state.update(elapsedTime / 4).update(elapsedTime / 4).update(elapsedTime / 4).update(elapsedTime / 4);
+        }
+        View_1.render(fg, state);
+        fgx.restore();
         requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
@@ -30035,7 +30202,7 @@ function addButtons() {
             document.querySelector('#mass').value = String(val);
         });
     }
-    [10, 100, 250, 500, 1000, 5000].map(button);
+    [1, 10, 100, 500, 1000, 2500, 5000, 10000, 50000, 100000].map(button);
 }
 exports.addButtons = addButtons;
 

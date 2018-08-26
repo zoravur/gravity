@@ -14,6 +14,4 @@ export function render(canvas: HTMLCanvasElement, state: State) {
         cx.stroke();  
     })
     state.draw(cx);
-
-
 }
