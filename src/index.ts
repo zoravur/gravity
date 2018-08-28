@@ -27,7 +27,6 @@ function animate() {
   let bgx = bg.getContext('2d');
   let previous = performance.now();
 
-  //fgx.clearRect(0,0,fg.width, fg.height);
   bgx.fillStyle = 'black';
   bgx.fillRect(0, 0, bg.width, bg.height);
 
@@ -37,7 +36,7 @@ function animate() {
 
     input.setTransform();
 
-    let elapsedTime = Math.min((_timestamp - previous)/1000, 2/60); //elapsed time in seconds
+    let elapsedTime = 1/60 || Math.min((_timestamp - previous)/1000, 2/60); //elapsed time in seconds
     previous = _timestamp;
 
     //Draw blue input line
@@ -48,7 +47,6 @@ function animate() {
       state.update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4);
       
     }
-    
     
     render(fg, state);
     

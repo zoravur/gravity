@@ -2,6 +2,7 @@ import Vec, { Vector } from './Vec';
 import constants from './Options'
 declare let require;
 import interpolate = require('color-interpolate');
+import { arrow } from './View';
 
 //const bigG = -50;
 //const inverseDegree = 2;
@@ -23,8 +24,12 @@ class Projectile {
     this.id = Math.random();
   }
 
-  get momentum() : any {
+  get momentum() : Vector {
     return this.velocity.times(this.mass);
+  }
+
+  set momentum(vec: Vector) {
+    this.velocity = vec.times(1/this.mass)
   }
 
   computeColor () {
@@ -41,16 +46,32 @@ class Projectile {
       }))
       .map(({displacement, mass}) => Vec(
         /* Gmm/r^2 */
-        constants.bigG*mass*this.mass/(Math.pow(displacement.magnitude, constants.inverseDegree)),
+        constants.bigG*mass/(Math.pow(displacement.magnitude, constants.inverseDegree)),
         displacement.angle,
         true // Is polar
       ))
       .reduce((total, cur) => total.plus(cur), Vec())
-      .times(1/this.mass)
+      //.times(1/this.mass)
+  }
+
+  getForce(projectiles) {
+    return projectiles
+    .filter(({ id }) => (id != this.id))
+    .map(proj => ({
+      displacement: this.position.minus(proj.position),
+      mass: proj.mass
+    }))
+    .map(({displacement, mass}) => Vec(
+      /* Gmm/r^2 */
+      constants.bigG*mass*this.mass/(Math.pow(displacement.magnitude, constants.inverseDegree)),
+      displacement.angle,
+      true // Is polar
+    ))
+    .reduce((total, cur) => total.plus(cur), Vec())
   }
 
   //The new and improved updateVelocity & updatePosition
-  integrate(elapsedTime, projectiles) {
+  verletIntegrate(elapsedTime, projectiles) {
     let a_0 = this.acceleration.plus(Vec(0,0));
 
     // d = v1*t + 1/2at^2
@@ -80,8 +101,28 @@ class Projectile {
     return this;
   }
 
+  midpointIntegrate(h, projectiles) {
+    this.position = this.position.plus(this.velocity.times(h/2));
+    this.velocity = this.velocity.plus(this.updateAcceleration(projectiles).times(h));
+    this.position = this.position.plus(this.velocity.times(h/2));
+    return this;
+  }
+
+  fourthOrderIntegrate(h, projectiles) {
+    // n = 2^(1/3)
+    const n = 1.2599210498948732;
+    const w_0 = 1/(2-n);
+    const w_1 = -n/(2-n);
+    this.midpointIntegrate(w_0*h, projectiles);
+    this.midpointIntegrate(w_1*h, projectiles);
+    this.midpointIntegrate(w_0*h, projectiles);
+    return this;
+  }
+
+  //static momentumIntegrate()
+
+
   static RK4Integrate(h: number, projectiles: Projectile[]) {
-    //Hope to ass this works
 
     let v1 = projectiles.map(proj => proj.velocity);
     let p1 = projectiles.map(proj => proj.position);
@@ -109,52 +150,36 @@ class Projectile {
       proj.velocity = proj.velocity.plus(proj.acceleration.times(h));
     });
 
-    
+
     return projectiles;
 
+  }
+
+  computeRadius() {
+    return (Math.log(Math.abs(this.mass))+2)/1.5;
   }
 
   draw(cx: CanvasRenderingContext2D) {
     cx.save();
     //cx.translate(0.5, 0.5);
-    let arrow = (s: Vector, e: Vector) => {
-      cx.beginPath();
-      cx.moveTo(s.x, s.y);
-      cx.lineTo(e.x, e.y);
-      cx.stroke();
-      cx.beginPath();
-      cx.moveTo(e.x, e.y);
-      let {x, y} = e.minus(s).normalize().times(7).rotate(5/6*Math.PI).plus(e);
-      //console.log(x,y);
-      cx.lineTo(x,y);
-      ({x, y} = e.minus(s).normalize().times(7).rotate(-5/6*Math.PI).plus(e));
-      cx.lineTo(x,y);
-      //console.log(x,y);
-      cx.closePath();
-      cx.fill();
-    }
+
 
 
     cx.fillStyle = cx.strokeStyle = this.computeColor();
     cx.beginPath();
-    cx.arc(this.position.x, this.position.y, (Math.log(Math.abs(this.mass))+2)/1.5, 0, 2*Math.PI);
+    cx.arc(this.position.x, this.position.y, this.computeRadius(), 0, 2*Math.PI);
     cx.fill();
 
     if (constants.velocityArrow)
-      arrow(this.position, this.position.plus(this.velocity));
+      arrow(cx, this.position, this.position.plus(this.velocity));
     if (constants.accelerationArrow)
-      arrow(this.position, this.position.plus(this.acceleration));
-    // cx.beginPath();
-    // cx.moveTo(this.position.x, this.position.y);
-    // let endPoint = this.position.plus(this.velocity);
-    // cx.lineTo(endPoint.x, endPoint.y);
-    // cx.stroke();
+      arrow(cx, this.position, this.position.plus(this.acceleration));
     cx.restore();
   }
 
   static computeCollision(p1, p2) {
     let mass = +p1.mass + +p2.mass;
-    let position = p1.position.plus(p2.position).times(0.5);
+    let position = p1.position.times(p1.mass).plus(p2.position.times(p2.mass)).times(1/mass);
     let velocity = p1.momentum.plus(p2.momentum).times(1/mass);
     return new Projectile(position, velocity, mass);
   }

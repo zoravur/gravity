@@ -38,11 +38,14 @@
 			<select id="integration">
 				<optgroup label="Symplectic">
 					<option value="implicit-euler">Implicit Euler</option>
-					<option value="verlet" selected="selected">Verlet</option>
+					<option value="verlet">Verlet</option>
+					<option value="midpoint">Midpoint method</option>
+					<option value="fourth-order" selected>Fourth order</option>
 				</optgroup>
-				<optgroup label="Not-sympletic (everything breaks)">
+				<optgroup label="Not-symplectic (everything breaks)">
 					<option value="euler">Euler</option>
 					<option value="RK4">Runge Kutta 4th order</option>
+
 				</optgroup>
 			</select>
 

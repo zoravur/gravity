@@ -29799,6 +29799,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
 const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
 const interpolate = __webpack_require__(/*! color-interpolate */ "./node_modules/color-interpolate/index.js");
+const View_1 = __webpack_require__(/*! ./View */ "./src/View.ts");
 //const bigG = -50;
 //const inverseDegree = 2;
 //If 2 dimensional, bigG is -1.
@@ -29815,6 +29816,9 @@ class Projectile {
     get momentum() {
         return this.velocity.times(this.mass);
     }
+    set momentum(vec) {
+        this.velocity = vec.times(1 / this.mass);
+    }
     computeColor() {
         let colormap = interpolate(['white', 'brown', 'orange', 'red']);
         return colormap(Math.log10(Math.max(this.mass, 1)) / 4);
@@ -29828,13 +29832,26 @@ class Projectile {
         }))
             .map(({ displacement, mass }) => Vec_1.default(
         /* Gmm/r^2 */
+        Options_1.default.bigG * mass / (Math.pow(displacement.magnitude, Options_1.default.inverseDegree)), displacement.angle, true // Is polar
+        ))
+            .reduce((total, cur) => total.plus(cur), Vec_1.default());
+        //.times(1/this.mass)
+    }
+    getForce(projectiles) {
+        return projectiles
+            .filter(({ id }) => (id != this.id))
+            .map(proj => ({
+            displacement: this.position.minus(proj.position),
+            mass: proj.mass
+        }))
+            .map(({ displacement, mass }) => Vec_1.default(
+        /* Gmm/r^2 */
         Options_1.default.bigG * mass * this.mass / (Math.pow(displacement.magnitude, Options_1.default.inverseDegree)), displacement.angle, true // Is polar
         ))
-            .reduce((total, cur) => total.plus(cur), Vec_1.default())
-            .times(1 / this.mass);
+            .reduce((total, cur) => total.plus(cur), Vec_1.default());
     }
     //The new and improved updateVelocity & updatePosition
-    integrate(elapsedTime, projectiles) {
+    verletIntegrate(elapsedTime, projectiles) {
         let a_0 = this.acceleration.plus(Vec_1.default(0, 0));
         // d = v1*t + 1/2at^2
         let delta = this.velocity.times(elapsedTime).plus(a_0.times(0.5 * elapsedTime * elapsedTime));
@@ -29857,8 +29874,24 @@ class Projectile {
         this.velocity = this.velocity.plus(this.acceleration.times(h));
         return this;
     }
+    midpointIntegrate(h, projectiles) {
+        this.position = this.position.plus(this.velocity.times(h / 2));
+        this.velocity = this.velocity.plus(this.updateAcceleration(projectiles).times(h));
+        this.position = this.position.plus(this.velocity.times(h / 2));
+        return this;
+    }
+    fourthOrderIntegrate(h, projectiles) {
+        // n = 2^(1/3)
+        const n = 1.2599210498948732;
+        const w_0 = 1 / (2 - n);
+        const w_1 = -n / (2 - n);
+        this.midpointIntegrate(w_0 * h, projectiles);
+        this.midpointIntegrate(w_1 * h, projectiles);
+        this.midpointIntegrate(w_0 * h, projectiles);
+        return this;
+    }
+    //static momentumIntegrate()
     static RK4Integrate(h, projectiles) {
-        //Hope to ass this works
         let v1 = projectiles.map(proj => proj.velocity);
         let p1 = projectiles.map(proj => proj.position);
         let a1 = projectiles.map(proj => proj.updateAcceleration(projectiles));
@@ -29882,43 +29915,25 @@ class Projectile {
         });
         return projectiles;
     }
+    computeRadius() {
+        return (Math.log(Math.abs(this.mass)) + 2) / 1.5;
+    }
     draw(cx) {
         cx.save();
         //cx.translate(0.5, 0.5);
-        let arrow = (s, e) => {
-            cx.beginPath();
-            cx.moveTo(s.x, s.y);
-            cx.lineTo(e.x, e.y);
-            cx.stroke();
-            cx.beginPath();
-            cx.moveTo(e.x, e.y);
-            let { x, y } = e.minus(s).normalize().times(7).rotate(5 / 6 * Math.PI).plus(e);
-            //console.log(x,y);
-            cx.lineTo(x, y);
-            ({ x, y } = e.minus(s).normalize().times(7).rotate(-5 / 6 * Math.PI).plus(e));
-            cx.lineTo(x, y);
-            //console.log(x,y);
-            cx.closePath();
-            cx.fill();
-        };
         cx.fillStyle = cx.strokeStyle = this.computeColor();
         cx.beginPath();
-        cx.arc(this.position.x, this.position.y, (Math.log(Math.abs(this.mass)) + 2) / 1.5, 0, 2 * Math.PI);
+        cx.arc(this.position.x, this.position.y, this.computeRadius(), 0, 2 * Math.PI);
         cx.fill();
         if (Options_1.default.velocityArrow)
-            arrow(this.position, this.position.plus(this.velocity));
+            View_1.arrow(cx, this.position, this.position.plus(this.velocity));
         if (Options_1.default.accelerationArrow)
-            arrow(this.position, this.position.plus(this.acceleration));
-        // cx.beginPath();
-        // cx.moveTo(this.position.x, this.position.y);
-        // let endPoint = this.position.plus(this.velocity);
-        // cx.lineTo(endPoint.x, endPoint.y);
-        // cx.stroke();
+            View_1.arrow(cx, this.position, this.position.plus(this.acceleration));
         cx.restore();
     }
     static computeCollision(p1, p2) {
         let mass = +p1.mass + +p2.mass;
-        let position = p1.position.plus(p2.position).times(0.5);
+        let position = p1.position.times(p1.mass).plus(p2.position.times(p2.mass)).times(1 / mass);
         let velocity = p1.momentum.plus(p2.momentum).times(1 / mass);
         return new Projectile(position, velocity, mass);
     }
@@ -29965,9 +29980,11 @@ class State {
         let arr = JSON.parse(JSON.stringify(this.projectiles)); //XXX
         if (Options_1.default.integration !== 'RK4') {
             let integration = {
-                'verlet': Projectile_1.default.prototype.integrate,
+                'verlet': Projectile_1.default.prototype.verletIntegrate,
                 'implicit-euler': Projectile_1.default.prototype.implicitEulerIntegrate,
-                'euler': Projectile_1.default.prototype.eulerIntegrate
+                'euler': Projectile_1.default.prototype.eulerIntegrate,
+                'midpoint': Projectile_1.default.prototype.midpointIntegrate,
+                'fourth-order': Projectile_1.default.prototype.fourthOrderIntegrate
             };
             this.projectiles = this.projectiles.map((proj, _) => integration[Options_1.default.integration].call(proj, elapsedTime, arr));
         }
@@ -29995,7 +30012,7 @@ class State {
     }
     _computeCollisions() {
         return this.projectiles = this.projectiles.reduce((projs, cur) => {
-            let idx = projs.findIndex(other => cur.position.minus(other.position).magnitude < 5);
+            let idx = projs.findIndex(other => cur.position.minus(other.position).magnitude < (cur.computeRadius() + other.computeRadius()) / 2);
             if (idx === -1) {
                 projs.push(cur);
                 return projs;
@@ -30108,8 +30125,11 @@ exports.default = Vec;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Projectile_1 = __webpack_require__(/*! ./Projectile */ "./src/Projectile.ts");
 const d3 = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+let cx;
 function render(canvas, state) {
-    let cx = canvas.getContext('2d');
+    //let cx = canvas.getContext('2d');
+    if (!cx)
+        cx = canvas.getContext('2d');
     state.history.forEach((path) => {
         let line = d3.line().context(cx);
         cx.save();
@@ -30121,6 +30141,24 @@ function render(canvas, state) {
     state.draw(cx);
 }
 exports.render = render;
+;
+let arrow = (cx, s, e) => {
+    cx.beginPath();
+    cx.moveTo(s.x, s.y);
+    cx.lineTo(e.x, e.y);
+    cx.stroke();
+    cx.beginPath();
+    cx.moveTo(e.x, e.y);
+    let { x, y } = e.minus(s).normalize().times(7).rotate(5 / 6 * Math.PI).plus(e);
+    //console.log(x,y);
+    cx.lineTo(x, y);
+    ({ x, y } = e.minus(s).normalize().times(7).rotate(-5 / 6 * Math.PI).plus(e));
+    cx.lineTo(x, y);
+    //console.log(x,y);
+    cx.closePath();
+    cx.fill();
+};
+exports.arrow = arrow;
 
 
 /***/ }),
@@ -30155,14 +30193,13 @@ function animate() {
     let fgx = fg.getContext('2d');
     let bgx = bg.getContext('2d');
     let previous = performance.now();
-    //fgx.clearRect(0,0,fg.width, fg.height);
     bgx.fillStyle = 'black';
     bgx.fillRect(0, 0, bg.width, bg.height);
     function loop(_timestamp) {
         fg.height = fg.height;
         fgx.save();
         input.setTransform();
-        let elapsedTime = Math.min((_timestamp - previous) / 1000, 2 / 60); //elapsed time in seconds
+        let elapsedTime = 1 / 60 || Math.min((_timestamp - previous) / 1000, 2 / 60); //elapsed time in seconds
         previous = _timestamp;
         //Draw blue input line
         input.drawInput();

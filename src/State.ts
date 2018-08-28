@@ -32,9 +32,11 @@ export default class State {
 
     if (options.integration !== 'RK4') {
       let integration = {
-        'verlet': Projectile.prototype.integrate,
+        'verlet': Projectile.prototype.verletIntegrate,
         'implicit-euler': Projectile.prototype.implicitEulerIntegrate,
-        'euler': Projectile.prototype.eulerIntegrate
+        'euler': Projectile.prototype.eulerIntegrate,
+        'midpoint': Projectile.prototype.midpointIntegrate,
+        'fourth-order': Projectile.prototype.fourthOrderIntegrate
       }
   
       this.projectiles = this.projectiles.map(
@@ -77,7 +79,8 @@ export default class State {
 
 
     return this.projectiles = this.projectiles.reduce((projs: Projectile[], cur: Projectile) => {
-      let idx = projs.findIndex(other => cur.position.minus(other.position).magnitude < 5);
+      let idx = projs.findIndex(other => 
+        cur.position.minus(other.position).magnitude < (cur.computeRadius() + other.computeRadius()) / 2);
       if (idx === -1) {
         projs.push(cur);
         return projs;
