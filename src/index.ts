@@ -7,16 +7,30 @@ import { addButtons } from './ui';
 import State from './State';
 import Input from './Input';
 import options from './Options';
-import FrameCount from './FrameCounter';
+//import FrameCount from './FrameCounter';
 import { render } from './View';
+
 import 'normalize.css';
+import * as Stats from 'stats-js';
 
 
 let state: State;
 let fg: HTMLCanvasElement = document.querySelector('#fg');
 let bg: HTMLCanvasElement = document.querySelector('#bg');
-FrameCount(bg);
+//FrameCount(bg);
 let input: Input;
+
+let stats: Stats;
+(function() {
+  stats = new Stats();
+  stats.setMode(0);
+   
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.left = '0px';
+  stats.domElement.style.top = '0px';
+   
+  document.body.appendChild( stats.domElement );
+})();
 
 addButtons();
 
@@ -31,6 +45,8 @@ function animate() {
   bgx.fillRect(0, 0, bg.width, bg.height);
 
   function loop(_timestamp?: number) {
+    stats.begin();
+
     fg.height = fg.height;
     fgx.save();
 
@@ -51,6 +67,8 @@ function animate() {
     render(fg, state);
     
     fgx.restore();
+
+    stats.end();
 
     requestAnimationFrame(loop);
   }

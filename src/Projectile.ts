@@ -1,14 +1,8 @@
 import Vec, { Vector } from './Vec';
 import constants from './Options'
-declare let require;
-import interpolate = require('color-interpolate');
+// declare let require;
+import * as interpolate from 'color-interpolate';
 import { arrow } from './View';
-
-//const bigG = -50;
-//const inverseDegree = 2;
-//If 2 dimensional, bigG is -1.
-//If 3 dimensional, biGG is -50.
-//If 4 dimensional, bigG is -500
 
 class Projectile {
   mass: number;

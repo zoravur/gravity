@@ -29058,6 +29058,23 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/stats-js/build/stats.min.js":
+/*!**************************************************!*\
+  !*** ./node_modules/stats-js/build/stats.min.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+// stats.js - http://github.com/mrdoob/stats.js
+var Stats=function(){var l=Date.now(),m=l,g=0,n=Infinity,o=0,h=0,p=Infinity,q=0,r=0,s=0,f=document.createElement("div");f.id="stats";f.addEventListener("mousedown",function(b){b.preventDefault();t(++s%2)},!1);f.style.cssText="width:80px;opacity:0.9;cursor:pointer";var a=document.createElement("div");a.id="fps";a.style.cssText="padding:0 0 3px 3px;text-align:left;background-color:#002";f.appendChild(a);var i=document.createElement("div");i.id="fpsText";i.style.cssText="color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";
+i.innerHTML="FPS";a.appendChild(i);var c=document.createElement("div");c.id="fpsGraph";c.style.cssText="position:relative;width:74px;height:30px;background-color:#0ff";for(a.appendChild(c);74>c.children.length;){var j=document.createElement("span");j.style.cssText="width:1px;height:30px;float:left;background-color:#113";c.appendChild(j)}var d=document.createElement("div");d.id="ms";d.style.cssText="padding:0 0 3px 3px;text-align:left;background-color:#020;display:none";f.appendChild(d);var k=document.createElement("div");
+k.id="msText";k.style.cssText="color:#0f0;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";k.innerHTML="MS";d.appendChild(k);var e=document.createElement("div");e.id="msGraph";e.style.cssText="position:relative;width:74px;height:30px;background-color:#0f0";for(d.appendChild(e);74>e.children.length;)j=document.createElement("span"),j.style.cssText="width:1px;height:30px;float:left;background-color:#131",e.appendChild(j);var t=function(b){s=b;switch(s){case 0:a.style.display=
+"block";d.style.display="none";break;case 1:a.style.display="none",d.style.display="block"}};return{REVISION:12,domElement:f,setMode:t,begin:function(){l=Date.now()},end:function(){var b=Date.now();g=b-l;n=Math.min(n,g);o=Math.max(o,g);k.textContent=g+" MS ("+n+"-"+o+")";var a=Math.min(30,30-30*(g/200));e.appendChild(e.firstChild).style.height=a+"px";r++;b>m+1E3&&(h=Math.round(1E3*r/(b-m)),p=Math.min(p,h),q=Math.max(q,h),i.textContent=h+" FPS ("+p+"-"+q+")",a=Math.min(30,30-30*(h/100)),c.appendChild(c.firstChild).style.height=
+a+"px",m=b,r=0);return b},update:function(){l=this.end()}}};"object"===typeof module&&(module.exports=Stats);
+
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -29596,57 +29613,6 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/FrameCounter.ts":
-/*!*****************************!*\
-  !*** ./src/FrameCounter.ts ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
-let previous = performance.now();
-let counter = 0;
-function FrameCount(canvas, offset = Vec_1.default(10, 10), size = Vec_1.default(100, 40)) {
-    let animate = window.requestAnimationFrame;
-    let cx = canvas.getContext('2d');
-    const width = 1;
-    let frames = Array.apply(null, Array(5)).map(() => 0);
-    window.requestAnimationFrame = function (callback) {
-        //console.log('hereee');
-        //console.log(canvas);
-        let delta = performance.now() - previous;
-        previous += delta;
-        let column = counter++ % (size.x / width);
-        frames[column] = delta;
-        //cx.save();
-        cx.strokeStyle = 'black';
-        cx.beginPath();
-        cx.moveTo(column * width + offset.x, size.y + offset.y);
-        cx.lineTo(column * width + offset.x, size.y + offset.y - 60);
-        cx.stroke();
-        //cx.beginPath();
-        // frames.forEach((col, idx) => {
-        //     cx.moveTo(idx*width + offset.x, size.y + offset.y);
-        //     cx.lineTo(idx*width + offset.x, size.y + offset.y - col);
-        // });
-        cx.strokeStyle = 'white';
-        cx.strokeRect(offset.x, offset.y, size.x, size.y);
-        cx.beginPath();
-        cx.moveTo(column * width + offset.x, size.y + offset.y);
-        cx.lineTo(column * width + offset.x, size.y + offset.y - delta);
-        cx.stroke();
-        //cx.restore();
-        return animate(callback);
-    };
-}
-exports.default = FrameCount;
-
-
-/***/ }),
-
 /***/ "./src/Input.ts":
 /*!**********************!*\
   !*** ./src/Input.ts ***!
@@ -29798,13 +29764,9 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vec_1 = __webpack_require__(/*! ./Vec */ "./src/Vec.ts");
 const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
+// declare let require;
 const interpolate = __webpack_require__(/*! color-interpolate */ "./node_modules/color-interpolate/index.js");
 const View_1 = __webpack_require__(/*! ./View */ "./src/View.ts");
-//const bigG = -50;
-//const inverseDegree = 2;
-//If 2 dimensional, bigG is -1.
-//If 3 dimensional, biGG is -50.
-//If 4 dimensional, bigG is -500
 class Projectile {
     constructor(position, velocity, mass) {
         this.position = position;
@@ -30178,14 +30140,24 @@ const ui_1 = __webpack_require__(/*! ./ui */ "./src/ui.ts");
 const State_1 = __webpack_require__(/*! ./State */ "./src/State.ts");
 const Input_1 = __webpack_require__(/*! ./Input */ "./src/Input.ts");
 const Options_1 = __webpack_require__(/*! ./Options */ "./src/Options.ts");
-const FrameCounter_1 = __webpack_require__(/*! ./FrameCounter */ "./src/FrameCounter.ts");
+//import FrameCount from './FrameCounter';
 const View_1 = __webpack_require__(/*! ./View */ "./src/View.ts");
 __webpack_require__(/*! normalize.css */ "./node_modules/normalize.css/normalize.css");
+const Stats = __webpack_require__(/*! stats-js */ "./node_modules/stats-js/build/stats.min.js");
 let state;
 let fg = document.querySelector('#fg');
 let bg = document.querySelector('#bg');
-FrameCounter_1.default(bg);
+//FrameCount(bg);
 let input;
+let stats;
+(function () {
+    stats = new Stats();
+    stats.setMode(0);
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+})();
 ui_1.addButtons();
 function animate() {
     state = new State_1.default([]);
@@ -30196,6 +30168,7 @@ function animate() {
     bgx.fillStyle = 'black';
     bgx.fillRect(0, 0, bg.width, bg.height);
     function loop(_timestamp) {
+        stats.begin();
         fg.height = fg.height;
         fgx.save();
         input.setTransform();
@@ -30209,6 +30182,7 @@ function animate() {
         }
         View_1.render(fg, state);
         fgx.restore();
+        stats.end();
         requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
