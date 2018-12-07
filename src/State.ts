@@ -1,3 +1,4 @@
+/*
 import Projectile from './Projectile';
 import Vec, { Vector } from './Vec';
 import options from './Options';
@@ -40,7 +41,7 @@ export default class State {
       }
   
       this.projectiles = this.projectiles.map(
-        (proj, _, /* arr */) => integration[options.integration].call(proj, elapsedTime, arr)
+        (proj) => integration[options.integration].call(proj, elapsedTime, arr)
       );
     } else {
       this.projectiles = Projectile.RK4Integrate(elapsedTime, this.projectiles);
@@ -90,4 +91,4 @@ export default class State {
     }, []);
   }
 
-}
+}*/

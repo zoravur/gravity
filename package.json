@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "google-chrome dist/index.html",
-    "build": "npx webpack --mode=development && npm start"
+    "start": "python3 -m http.server && google-chrome dist/index.html",
+    "build": "npx webpack --mode=development",
+    "develop": "npm start && npx webpack --watch --mode=development"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "express": "^4.16.3",
     "morgan": "^1.9.0",
     "normalize.css": "^8.0.0",
+    "pixi.js": "^4.8.3",
     "socket.io": "^2.1.0",
     "source-map-loader": "^0.2.4",
     "stats-js": "^1.0.0-alpha1"

@@ -28,11 +28,11 @@ class Vector{
   }
 
   get magnitude() {
-    return this.toPolar().magnitude;
+    return Math.hypot(this.x, this.y);
   }
 
   get angle() {
-    return this.toPolar().angle;
+    return Math.atan2(this.y, this.x);
   }
   
   get degrees() {
@@ -43,11 +43,24 @@ class Vector{
     return this.times(1/this.magnitude);
   }
 
+  normalize_() {
+    this.x /= this.magnitude;
+    this.y /= this.magnitude;
+    return this;
+  }
+
   plus(v) {
     return new Vector(
       this.x + v.x,
       this.y + v.y
     );
+  }
+
+  
+  plus_(v) {
+    this.x += v.x;
+    this.y += v.y;
+    return this;
   }
 
   minus(v) {
@@ -57,11 +70,23 @@ class Vector{
     );
   }
 
+  minus_(v) {
+    this.x -= v.x;
+    this.y -= v.y;
+    return this;
+  }
+
   times(scalar) {
     return new Vector(
       this.x * scalar,
       this.y * scalar
     );
+  }
+
+  times_(s) {
+    this.x *= s;
+    this.y *= s;
+    return this;
   }
 
   dot(v) {

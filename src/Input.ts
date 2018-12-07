@@ -1,6 +1,7 @@
 import Projectile from './Projectile';
 import Vec from './Vec';
-import State from './State';
+import options from './Options';
+//import State from './State';
 
 'use strict';
 export default class Input {
@@ -10,13 +11,15 @@ export default class Input {
     canvas: HTMLCanvasElement;
     cx: CanvasRenderingContext2D;
     options;
+    getInputLine: Function;
     
-    constructor(canvas: HTMLCanvasElement, state: State, options) {
+    constructor(canvas: HTMLCanvasElement, fn: Function) {//state: State, options?) {
         this.drawInput = () => {};
+        this.getInputLine = () => {};
         this.options = options;
         this.canvas = canvas;
         this.cx = canvas.getContext('2d');
-        this.addProjectile = this.bindState(state);
+        this.addProjectile = fn
         this.camera = {
             delta: Vec(),
             position: Vec()
@@ -24,20 +27,8 @@ export default class Input {
         canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
     }
 
-    bindState(state: State) {
-        return function addProjectile(proj) {
-            state.add(proj);
-        }
-    }
-
     getTransform() {
         return this.camera.position.plus(this.camera.delta);
-    }
-
-    setTransform(reverse? : boolean) {
-        let {x, y} = this.getTransform();
-        if (reverse) this.cx.translate(-x, -y);
-        else this.cx.translate(x, y);
     }
 
     handleMouseDown(event: MouseEvent) {
@@ -83,6 +74,10 @@ export default class Input {
                 this.cx.stroke();
                 this.cx.restore();
             }
+            this.getInputLine = () => ({
+                start: startVec,
+                end: end
+            })
         }
         canvas.addEventListener('mousemove', moveHandle);
 
@@ -90,6 +85,7 @@ export default class Input {
             let end = Vec(event.offsetX, event.offsetY)
             end = end.minus(this.camera.position);
             this.drawInput = () => {};
+            this.getInputLine = () => {};
             let delta = end.minus(startVec);
             this.addProjectile(new Projectile(startVec, delta, this.options.projectileMass));
 

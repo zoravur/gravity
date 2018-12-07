@@ -6,7 +6,8 @@
         "module": "commonjs",
         "lib": [
             "es6",
-            "dom"
+            "dom",
+            "webworker"
         ]
     },
     "include": [

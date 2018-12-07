@@ -1,11 +1,14 @@
 /* eslint-disable */
 
 module.exports = {
-    entry: "./src/index.ts",
-    output: {
-        filename: "main.js",
-        path: __dirname + "/dist"
+    entry: {
+        main: "./src/index.ts",
+        worker: "./src/Worker.ts"
     },
+    // output: {
+    //     filename: "main.js",
+    //     path: __dirname + "/dist"
+    // },
 
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
