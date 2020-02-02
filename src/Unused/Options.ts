@@ -1,6 +1,7 @@
 export function Options(onchange) {
-    let options = {};
+    //let options = {};
 
+    /*
     const fields = [
         ['projectileMass', 'mass', 100],
         ['bigG', 'big-g-control', -50],
@@ -12,7 +13,9 @@ export function Options(onchange) {
         ['velocityArrow', 'velocity-arrow'],
         ['historyLength', 'history-length', 500],
     ];
+    */
 
+    /*
     fields.forEach(([key, elementId, defaultVal]) => { 
         options[key] = getValueFromInputElement(document.getElementById(<string>elementId)) || defaultVal;
         watchChange(key,elementId,defaultVal); 
@@ -38,6 +41,8 @@ export function Options(onchange) {
     }
 
     return options;
+
+     */
 }
 
 

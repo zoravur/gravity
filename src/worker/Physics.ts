@@ -1,5 +1,5 @@
 import Projectile from './Projectile';
-import Vec, {Vector} from './Vec';
+import Vec, {Vector} from '../lib/Vec';
 
 
 class Physics {

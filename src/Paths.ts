@@ -1,7 +1,10 @@
-import { Vector } from './Vec';
-import Projectile from './Projectile';
+import { Vector } from './lib/Vec';
+//import Projectile from './worker/Projectile';
+import {v4String} from "uuid/interfaces";
 
 
+
+/*
 type ProjectilePath = {position: Vector[], mass: number}
 class PathHistory extends Map<number, ProjectilePath > {
 
@@ -24,5 +27,8 @@ class PathHistory extends Map<number, ProjectilePath > {
 
 
 }
+*/
+
+type PathHistory = Map<v4String, Array<Vector>>;
 
 export default PathHistory;

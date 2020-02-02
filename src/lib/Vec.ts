@@ -114,6 +114,10 @@ class Vector{
     let vhat = v.normalize();
     return vhat.times(this.dot(vhat));
   }
+
+  equals(other) {
+    return this.x == other.x && this.y == other.y;
+  }
 }
 
 let Vec = function(x?, y?, isPolar?): Vector { return new Vector(x, y, isPolar); };

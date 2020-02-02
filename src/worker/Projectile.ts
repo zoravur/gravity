@@ -1,22 +1,24 @@
-import Vec, { Vector } from './Vec';
-import constants from './Options'
-// declare let require;
-import * as interpolate from 'color-interpolate';
-import { arrow } from './View';
+import Vec, { Vector } from '../lib/Vec';
+import { v4 as uuid } from 'uuid';
+
+// import constants from '../Unused/Options'
+// // declare let require;
+// import * as interpolate from 'color-interpolate';
+// import { arrow } from '../View';
 
 class Projectile {
   mass: number;
   position: Vector;
   velocity: Vector;
   acceleration: Vector;
-  id: number;
+  id: string;
   _radius: number;
   constructor(position, velocity, mass?) {
     this.position = position;
     this.velocity = velocity;
     this.acceleration = Vec(0,0);
     this.mass = mass || 50;
-    this.id = Math.random();
+    this.id = uuid();
   }
 
   get momentum() : Vector {

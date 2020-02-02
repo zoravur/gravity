@@ -1,54 +1,121 @@
-/*jshint globalstrict:false */
 'use strict';
 
-import Projectile from './Projectile';
-import Vec from './Vec';
-import { addButtons } from './ui';
-import Input from './Input';
+import OptionsManager from './OptionsManager';
+import Input, {InputEvent} from './Input';
 import PathHistory from './Paths';
-import optionsAuto, { Options } from './Options';
-import { render } from './View';
-import * as PIXI from 'pixi.js';
+import optionsAuto, { Options } from './Unused/Options';
+import Renderer, {ItemsToRender, RenderingRules} from './View';
+import fitToContainer from './lib/fitToContainer';
+import Store from './Store';
 
 import 'normalize.css';
 import * as Stats from 'stats-js';
+import Vec, {Vector} from "./lib/Vec";
+import ProjectileFactory from "./ProjectileFactory";
+import Projectile from "./worker/Projectile";
+import Simulator from "./Simulator";
 
-const pixiApp = new PIXI.Application({width: 1000, height: 700});
-let fg: HTMLCanvasElement = document.querySelector('#fg') || pixiApp.view;
-fg.id = "fg";
-fg.style.zIndex = '1';
-fg.style.position = 'absolute';
-//Object.assign(fg.style, {border: "1px solid rgb(0, 0, 0)", position: "absolute; z-index: 1"});
-//let fg: HTMLCanvasElement = document.querySelector('#fg');
+let fg: HTMLCanvasElement = document.querySelector('#fg')
 let bg: HTMLCanvasElement = document.querySelector('#bg');
 
 document.querySelector('#graphics').insertBefore(fg,bg);
 
-
-
 let input: Input;
 let stats: Stats;
-let options;
 let pathHistory;
+let optionsManager: OptionsManager;
+let renderer: Renderer;
 
+function setup() {
+  fitToContainer(fg)
+  fitToContainer(bg)
 
-addButtons();
+  let bgx = bg.getContext('2d');
+  bgx.fillStyle = 'black';
+  bgx.fillRect(0, 0, bg.width, bg.height);
+}
+
 function init() {
-  console.log('init');
-  let worker = new Worker('worker.js');
-  input = new Input(fg, proj => {
-    worker.postMessage({
-      type: 'new-projectile',
-      projectile: proj
-    })
+  // set up backwards: output, state, input
+  setup();
+  renderer = new Renderer(fg);
+
+  // TODO: Use filtering to set up functionalities like workflows
+
+  // Stores --> View
+  let itemsToRenderStore = new Store<ItemsToRender>({ projectiles: [] })
+  itemsToRenderStore.subscribe(items => {
+    renderer.render(items);
   });
 
-  // TODO: Change options to an Object: (i.e. new Options(...)  )
+  let renderingRulesStore = new Store<RenderingRules>({
+    velocityVectors: false,
+    forceVectors: false,
+    paths: false,
+    cameraOrigin: Vec(0, 0)
+  });
+  renderingRulesStore.subscribe(rules => {
+    renderer.setRules(rules);
+    renderer.render(itemsToRenderStore.state);
+  })
+
+  let projectileStore = new Store<Array<Projectile>>([]);
+  projectileStore.subscribe(data => {
+    itemsToRenderStore.state.projectiles = data;
+    itemsToRenderStore.propagate()
+  })
+
+  // Controllers --> Middleware --> Stores
+  let projectileFactory = new ProjectileFactory(50);
+  let simulator = new Simulator();
+  simulator.subscribe(data => {
+    projectileStore.state = data;
+    projectileStore.propagate();
+  })
+
+  optionsManager = new OptionsManager();
+  optionsManager.registerHandlers();
+  optionsManager.subscribe((options) => {
+    Object.assign(renderingRulesStore.state, options.display);
+    renderingRulesStore.propagate();
+    projectileFactory.setMass(options.particles.mass);
+    if (options.playback.pause) simulator.pause();
+    else simulator.play();
+  });
+
+  input = new Input(fg);
+  input.subscribe((data: InputEvent) => {
+    if (data.inputArrow) {
+      itemsToRenderStore.state.inputArrow = data.inputArrow;
+      itemsToRenderStore.propagate();
+    }
+    if (data.cameraUpdate) {
+      renderingRulesStore.state.cameraOrigin = data.cameraUpdate;
+      renderingRulesStore.propagate();
+    }
+    if (data.newProjectile) {
+      let newProjectile = projectileFactory.create(data.newProjectile);
+      simulator.addProjectile(newProjectile);
+      projectileStore.state.push(newProjectile);
+      projectileStore.propagate();
+      itemsToRenderStore.state.inputArrow = null;
+      itemsToRenderStore.propagate();
+    }
+  })
+
+}
+
+/*
+function initOld() {
+  let worker = new Worker('worker.js');
+  input = new Input(fg);
+
+
+
   options = Options((newOptions) => {
     worker.postMessage({
       type: 'set-engine-rules',
       rules: newOptions, //NOTE: CURRENTLY SENDING ENTIRE OPTIONS OBJECT
-
     });
   });
 
@@ -56,12 +123,10 @@ function init() {
   bgx.fillStyle = 'black';
   bgx.fillRect(0, 0, bg.width, bg.height);
 
-  pathHistory = new PathHistory();
+  //pathHistory = new PathHistory();
+
   function handleSimulationStep(e) {
-
-
-
-    pathHistory.addStep(e.data.projectiles, options);
+    //pathHistory.addStep(e.data.projectiles, options);
     stats.begin();
     requestAnimationFrame(() => {
       stats.end();
@@ -82,77 +147,23 @@ function init() {
         handleSimulationStep(e);
         break;
 
-      // case 'history':
-      //   handleHistoryUpdate(e);
-      //   break;
-
       default:
         throw Error('Unhandled message type');
         break;
     }
-
-
   };
 }
+ */
 
-
-
-(function () {
-  stats = new Stats();
-  stats.setMode(0);
-
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.left = '0px';
-  stats.domElement.style.top = '0px';
-
-  document.body.appendChild(stats.domElement);
-})();
+// (function () {
+//   stats = new Stats();
+//   stats.setMode(0);
+//
+//   stats.domElement.style.position = 'absolute';
+//   stats.domElement.style.left = '0px';
+//   stats.domElement.style.top = '0px';
+//
+//   document.body.appendChild(stats.domElement);
+// })();
 
 init();
-
-/*
-function animate() {
-  state = new State([]);
-  input = new Input(fg, state, options);
-  let fgx = fg.getContext('2d');
-  let bgx = bg.getContext('2d');
-  let previous = performance.now();
-
-  bgx.fillStyle = 'black';
-  bgx.fillRect(0, 0, bg.width, bg.height);
-
-  function loop(_timestamp?: number) {
-    stats.begin();
-
-    fg.height = fg.height;
-    fgx.save();
-
-    input.setTransform();
-
-    let elapsedTime = 1/60 || Math.min((_timestamp - previous)/1000, 2/60); //elapsed time in seconds
-    previous = _timestamp;
-
-    //Draw blue input line
-    input.drawInput();
-    
-    //Updating state more granularly allows for better physics.
-    if (!options.pause) {
-      state.update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4).update(elapsedTime/4);
-      
-    }
-    
-    render(fg, state);
-    
-    fgx.restore();
-
-    stats.end();
-
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-  
-}
-
-addEventListener('dblclick', () => console.log(state));
-animate();
-*/

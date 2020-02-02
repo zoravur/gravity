@@ -1,9 +1,150 @@
-import Vec, { Vector } from './Vec';
-import Projectile from './Projectile';
+import Vec, { Vector } from './lib/Vec';
+import Projectile from './worker/Projectile';
 import * as interpolate from 'color-interpolate';
+import PathHistory from "./Paths";
+import Arrow from "./Arrow";
 
-let cx: CanvasRenderingContext2D;
-export function render(canvas: HTMLCanvasElement, itemsToRender, rules) {
+interface RenderingRules {
+    forceVectors: boolean;
+    velocityVectors: boolean;
+    paths: boolean;
+    cameraOrigin: Vector;
+}
+
+interface ItemsToRender {
+    projectiles: Array<Projectile>;
+    particleHistory?: PathHistory;
+    inputArrow?: Arrow;
+}
+
+class Renderer {
+    canvas: HTMLCanvasElement;
+    cx: CanvasRenderingContext2D;
+    rules: RenderingRules;
+    constructor(canvas: HTMLCanvasElement) {
+        this.canvas = canvas;
+        this.cx = this.canvas.getContext('2d');
+        this.rules = {
+            forceVectors: false,
+            velocityVectors: false,
+            paths: false,
+            cameraOrigin: Vec(0,0)
+        }
+    }
+
+    setRules(rules: RenderingRules) {
+        this.rules = rules;
+    }
+
+    render(itemsToRender : ItemsToRender) {
+        let cx = this.cx;
+
+        cx.clearRect(0,0,this.canvas.width,this.canvas.height);
+        cx.save();
+
+        if (!this.rules.cameraOrigin.equals(Vec(0,0))) {
+            // TODO: Update camera position
+            let {x, y} = this.rules.cameraOrigin;
+            cx.translate(x, y);
+        }
+
+        if (this.rules.paths) {
+            // TODO: Add logic for particle path rendering
+        }
+
+        if (itemsToRender.inputArrow) {
+            let { start, delta } = itemsToRender.inputArrow;
+            let end = start.plus(delta);
+
+            cx.save();
+            cx.strokeStyle = 'blue';
+            cx.beginPath();
+            cx.moveTo(start.x, start.y);
+            cx.lineTo(end.x, end.y);
+            cx.stroke();
+            cx.restore();
+        }
+
+        const renderProjectile = projectile => {
+            drawProjectile(this.cx, projectile, this.rules);
+        }
+
+        itemsToRender.projectiles.forEach(renderProjectile);
+
+        cx.restore();
+    }
+
+}
+
+const drawPathHistory = (cx, path, mass) => {
+    cx.fillStyle = cx.strokeStyle = colorMap(Math.log10(Math.max(mass, 1))/4);
+
+    cx.beginPath();
+    path.forEach(({x, y}) => {
+        cx.lineTo(x,y);
+    });
+    cx.stroke();
+}
+
+const drawProjectile = (cx: CanvasRenderingContext2D, proj: Projectile, options?: RenderingRules) => {
+    cx.fillStyle = cx.strokeStyle = computeProjectileColor(proj);
+
+    cx.beginPath();
+    cx.arc(proj.position.x, proj.position.y,
+         (proj._radius || Projectile.prototype.computeRadius.apply(proj)), 0, 2*Math.PI);
+    cx.fill();
+
+    let pos = Object.assign(Vec(), proj.position);
+    let vel = Object.assign(Vec(), proj.velocity);
+    let accel = Object.assign(Vec(), proj.acceleration);
+    if (options.velocityVectors) {
+        drawArrow(cx, pos, pos.plus(vel));
+    }
+    if (options.forceVectors) {
+        drawArrow(cx, pos, pos.plus(accel));
+    }
+}
+
+const drawInput = (cx, arrow: Arrow) => {
+    let start = arrow.start;
+    let end = arrow.start.plus(arrow.delta);
+    cx.strokeStyle = 'blue';
+    cx.beginPath();
+    cx.moveTo(start.x, start.y);
+    cx.lineTo(end.x, end.y);
+    cx.stroke();
+}
+
+
+let colorMap = interpolate(['white', 'brown', 'orange', 'red']);
+function computeProjectileColor(proj: Projectile) {
+    return colorMap(Math.log10(Math.max(proj.mass, 1))/4);
+}
+
+
+let drawArrow = (cx: CanvasRenderingContext2D, s: Vector, e: Vector) => {
+    cx.beginPath();
+    cx.moveTo(s.x, s.y);
+    cx.lineTo(e.x, e.y);
+    cx.stroke();
+    cx.beginPath();
+    cx.moveTo(e.x, e.y);
+    let {x, y} = e.minus(s).normalize().times(7).rotate(5/6*Math.PI).plus(e);
+    cx.lineTo(x,y);
+    ({x, y} = e.minus(s).normalize().times(7).rotate(-5/6*Math.PI).plus(e));
+    cx.lineTo(x,y);
+    cx.closePath();
+    cx.fill();
+}
+
+export default Renderer;
+export {
+    ItemsToRender,
+    RenderingRules
+}
+
+/*
+function render(canvas: HTMLCanvasElement, itemsToRender, rules) {
     if (!cx) cx = canvas.getContext('2d');
     cx.clearRect(0, 0, canvas.width, canvas.height);
     cx.save();
@@ -38,68 +179,7 @@ export function render(canvas: HTMLCanvasElement, itemsToRender, rules) {
     }
 
     cx.restore();
-};
-
-const drawPathHistory = (cx, path, mass) => {
-    cx.fillStyle = cx.strokeStyle = colormap(Math.log10(Math.max(mass, 1))/4);
-
-    cx.beginPath();
-    path.forEach(({x, y}) => {
-        cx.lineTo(x,y);
-    });
-    cx.stroke();
-
 }
 
-
-const drawProjectile = (cx, proj, options?) => {
-    cx.fillStyle = cx.strokeStyle = computeProjectileColor(proj);
-
-    cx.beginPath();
-    cx.arc(proj.position.x, proj.position.y,
-         (proj._radius || Projectile.prototype.computeRadius.apply(proj)), 0, 2*Math.PI);
-    cx.fill();
-
-    let pos = Object.assign(Vec(), proj.position);
-    let vel = Object.assign(Vec(), proj.velocity);
-    let accel = Object.assign(Vec(), proj.acceleration);
-    if (options.velocityArrow)
-      arrow(cx, pos, pos.plus(vel));
-    if (options.accelerationArrow)
-      arrow(cx, pos, pos.plus(accel));
-}
-
-
-const drawInput = (cx, {start, end}) => {
-    cx.strokeStyle = 'blue';
-    cx.beginPath();
-    cx.moveTo(start.x, start.y);
-    cx.lineTo(end.x, end.y);
-    cx.stroke();
-}
-
-
-let colormap = interpolate(['white', 'brown', 'orange', 'red']);
-function computeProjectileColor(proj: Projectile) {
-    return colormap(Math.log10(Math.max(proj.mass, 1))/4);
-}
-
-
-let arrow = (cx: CanvasRenderingContext2D, s: Vector, e: Vector) => {
-    cx.beginPath();
-    cx.moveTo(s.x, s.y);
-    cx.lineTo(e.x, e.y);
-    cx.stroke();
-    cx.beginPath();
-    cx.moveTo(e.x, e.y);
-    let {x, y} = e.minus(s).normalize().times(7).rotate(5/6*Math.PI).plus(e);
-    cx.lineTo(x,y);
-    ({x, y} = e.minus(s).normalize().times(7).rotate(-5/6*Math.PI).plus(e));
-    cx.lineTo(x,y);
-    cx.closePath();
-    cx.fill();
-}
-
-
-export {arrow};
+ */
 

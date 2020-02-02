@@ -1,34 +1,35 @@
-import Projectile from './Projectile';
-import Vec from './Vec';
-import options from './Options';
-//import State from './State';
+import Vec, {Vector} from './lib/Vec';
+import Subject from "./Subject";
+import Arrow from "./Arrow";
 
-'use strict';
-export default class Input {
-    addProjectile: Function; 
-    drawInput: Function; 
+/**
+ * Construct an input event type for the purposes of the observer pattern
+ */
+
+interface InputEvent {
+    inputArrow?: Arrow;
+    newProjectile?: Arrow;
+    cameraUpdate?: Vector;
+}
+
+class Input extends Subject<InputEvent> {
+    drawInput: Function;
     camera: any;
     canvas: HTMLCanvasElement;
     cx: CanvasRenderingContext2D;
-    options;
     getInputLine: Function;
-    
-    constructor(canvas: HTMLCanvasElement, fn: Function) {//state: State, options?) {
+
+    constructor(canvas: HTMLCanvasElement) {
+        super();
         this.drawInput = () => {};
         this.getInputLine = () => {};
-        this.options = options;
         this.canvas = canvas;
         this.cx = canvas.getContext('2d');
-        this.addProjectile = fn
         this.camera = {
-            delta: Vec(),
-            position: Vec()
+            delta: Vec(0, 0),
+            position: Vec(0, 0)
         }
         canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
-    }
-
-    getTransform() {
-        return this.camera.position.plus(this.camera.delta);
     }
 
     handleMouseDown(event: MouseEvent) {
@@ -44,8 +45,8 @@ export default class Input {
         let camera = this.camera;
         
         let moveHandle = event => {
-            let delta = Vec(event.offsetX, event.offsetY).minus(startVec);
-            camera.delta = delta;
+            this.camera.delta = Vec(event.offsetX, event.offsetY).minus(startVec);
+            this.emit({cameraUpdate: this.camera.position.plus(this.camera.delta)});
         }
         canvas.addEventListener('mousemove', moveHandle);
     
@@ -65,18 +66,11 @@ export default class Input {
         let moveHandle = event => {
             let end = Vec(event.offsetX, event.offsetY)
             end = end.minus(this.camera.position);
-            this.drawInput = () => {
-                this.cx.save();
-                this.cx.strokeStyle = 'blue';
-                this.cx.beginPath();
-                this.cx.moveTo(startVec.x, startVec.y);
-                this.cx.lineTo(end.x, end.y);
-                this.cx.stroke();
-                this.cx.restore();
-            }
-            this.getInputLine = () => ({
-                start: startVec,
-                end: end
+
+            this.emit({
+                inputArrow: {
+                    start: startVec, delta: end.minus(startVec)
+                }
             })
         }
         canvas.addEventListener('mousemove', moveHandle);
@@ -87,11 +81,22 @@ export default class Input {
             this.drawInput = () => {};
             this.getInputLine = () => {};
             let delta = end.minus(startVec);
-            this.addProjectile(new Projectile(startVec, delta, this.options.projectileMass));
+
+            this.emit({
+                newProjectile: {
+                    start: startVec,
+                    delta
+                }
+            })
 
             canvas.removeEventListener('mousemove', moveHandle);
             canvas.removeEventListener('mouseup', upHandle);
         }
         canvas.addEventListener('mouseup', upHandle);
     }
+}
+
+export default Input;
+export {
+    InputEvent
 }

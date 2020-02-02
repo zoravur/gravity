@@ -3,57 +3,98 @@
   	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
   	<title>yay</title>
+	  <link rel="stylesheet" type="text/css" href="main.css" />
   </head>
   <body>
+
+
+  <div id="main">
 		<div id="graphics">
-			<canvas id="fg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 1;" width=1000 height=700></canvas>
-			<canvas id="bg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 0;" width=1000 height=700>
-			</canvas><br/>
+			<canvas id="fg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 1;"></canvas>
+			<canvas id="bg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 0;"></canvas>
 		</div>
-		<div id="controls" style="margin-top: 700px;">
-			<div id="mass-control">
-				<label>Set default mass
-					<input id="mass" type="number" value="50"/>
-				</label>
+	  <!--  Set particle mass -->
+	  <!--  - Enter input -->
+	  <!--  - Buttons -->
+
+	  <!--  Speed -->
+	  <!--  - Pause/play -->
+	  <!--  - Fixed slider (0.5x, 1x, 2x) -->
+
+	  <!--  Display -->
+	  <!--  - Force vectors -->
+	  <!--  - Velocity vectors -->
+	  <!--  - Paths -->
+		<div id="controls">
+			<div id="particle-control">
+				<h3>Set particle mass</h3>
+				<div id="mass-control">
+					<label for="mass"></label><input id="mass" type="number" value="50"/><br/>
+				</div>
 			</div>
-			<label>Set bigG
-				<input id="big-g-control" type="number" value="100"/>
-			</label>
-			<label>Set inverse degree dimension (i.e. n in Gmm/r^n)
-				<input id="inverse-degree-control" type="number" value="2" step="0.1"/>
-			</label>
+			<div id="playback">
+				<h3>Playback</h3>
+				<div class="checkbox-container">
+					<label>
+						<input id="pause" type="checkbox" />Pause
+					</label>
+					<label>
+						<input id="speed" type="number" />Speed
+					</label>
+				</div>
+			</div>
+			<div id="display">
+				<h3>Display</h3>
+				<div class="checkbox-container">
+                    <label>
+						<input id="force" type="checkbox"/>Force vectors
+					</label>
+					<label>
+						<input id="velocity" type="checkbox"/>Velocity Vectors
+					</label>
+					<label>
+						<input id="paths" type="checkbox"/>Paths
+					</label>
+				</div>
 
-			<label>
-					<input id="pause" type="checkbox" />Pause
-			</label>
-			<label>
-					<input id="paths" type="checkbox" />Paths
-			</label>
-			<label>
-				<input id="history-length" type="number" value="500"/>Number of frames to include
-			</label>
-			<label>
-					<input id="velocity-arrow" type="checkbox" />Show velocities
-			</label>
-			<label>
-					<input id="acceleration-arrow" type="checkbox"/>Show acceleration
-			</label>
-			
-			<select id="integration">
-				<optgroup label="Symplectic">
-					<option value="implicit-euler">Implicit Euler</option>
-					<option value="verlet">Verlet</option>
-					<option value="midpoint">Midpoint method</option>
-					<option value="fourth-order" selected>Fourth order</option>
-				</optgroup>
-				<optgroup label="Not-symplectic (everything breaks)">
-					<option value="euler">Euler</option>
-					<option value="RK4">Runge Kutta 4th order</option>
+			</div>
 
-				</optgroup>
-			</select>
+<!--			<label>Set bigG-->
+<!--				<input id="big-g-control" type="number" value="100"/>-->
+<!--			</label>-->
+<!--			<label>Set inverse degree dimension (i.e. n in Gmm/r^n)-->
+<!--				<input id="inverse-degree-control" type="number" value="2" step="0.1"/>-->
+<!--			</label>-->
+
+<!--			<label>-->
+<!--					<input id="paths" type="checkbox" />Paths-->
+<!--			</label>-->
+<!--			<label>-->
+<!--				<input id="history-length" type="number" value="500"/>Number of frames to include-->
+<!--			</label>-->
+<!--			<label>-->
+<!--					<input id="velocity-arrow" type="checkbox" />Show velocities-->
+<!--			</label>-->
+<!--			<label>-->
+<!--					<input id="acceleration-arrow" type="checkbox"/>Show acceleration-->
+<!--			</label>-->
+
+<!--			<select id="integration">-->
+<!--				<optgroup label="Symplectic">-->
+<!--					<option value="implicit-euler">Implicit Euler</option>-->
+<!--					<option value="verlet">Verlet</option>-->
+<!--					<option value="midpoint">Midpoint method</option>-->
+<!--					<option value="fourth-order" selected>Fourth order</option>-->
+<!--				</optgroup>-->
+<!--				<optgroup label="Not-symplectic (everything breaks)">-->
+<!--					<option value="euler">Euler</option>-->
+<!--					<option value="RK4">Runge Kutta 4th order</option>-->
+
+<!--				</optgroup>-->
+<!--			</select>-->
 
 		</div>
-	<script src="main.js"></script>
+		<script src="main.js"></script>
+	</div>
   </body>
 </html>
