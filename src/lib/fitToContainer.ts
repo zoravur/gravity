@@ -1,4 +1,4 @@
-export default function fitToContainer(canvas){
+function fitToContainer(canvas){
     // Make it visually fill the positioned parent
     let parent = canvas.parentElement;
 
@@ -8,3 +8,9 @@ export default function fitToContainer(canvas){
     canvas.width  = parent.clientWidth;
     canvas.height = parent.clientHeight;
 }
+
+
+export default function resizeAsNeeded(canvas) {
+    fitToContainer(canvas);
+}
+

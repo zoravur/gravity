@@ -13,7 +13,7 @@ class ProjectileFactory {
     }
 
     create({start, delta}: Arrow) : Projectile {
-        return new Projectile(start, delta, this.mass);
+        return new Projectile(start, delta.times(1/2), this.mass);
     }
 }
 

@@ -16,9 +16,9 @@ interface Options {
   };
 }
 
-const inputFieldIds = ['mass', 'pause', 'speed', 'force', 'velocity', 'paths'];
+const inputFieldIds = ['mass', 'pause', /*'speed',*/ 'force', 'velocity', 'paths'];
 const optObjectPaths = ['particles.mass', 'playback.pause',
-  'playback.speed', 'display.forceVectors', 'display.velocityVectors', 'display.paths'];
+  /*'playback.speed', */'display.forceVectors', 'display.velocityVectors', 'display.paths'];
 
 export default class OptionsManager extends Subject<Options> {
   currentOptions: Options;
@@ -58,10 +58,11 @@ export default class OptionsManager extends Subject<Options> {
   addButtons() {
     let massControl = document.getElementById('mass-control');
 
-    function button(val: number) {
+    function button([val, label]: [number, string]) {
       let button = document.createElement('button');
-      button.textContent = String(val);
+      button.textContent = String(label);
       massControl.appendChild(button);
+      massControl.appendChild(document.createElement("br"));
       button.addEventListener('click', () => {
         let massEl = document.getElementById('mass') as HTMLInputElement;
         massEl.value = String(val);
@@ -97,7 +98,13 @@ export default class OptionsManager extends Subject<Options> {
         });
       });
     }
-    [1, 10, 100, 500, 1000, 2500, 5000, 10000].map(button);
+    [[1, 'Tiny'],
+      [10, 'Small'],
+      [100, 'Medium'],
+      [500, 'Large'],
+      [2500, 'Huge'],
+      [10000, 'Gigantic']
+    ].map(button);
   }
 }
 

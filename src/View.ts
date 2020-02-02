@@ -1,7 +1,7 @@
 import Vec, { Vector } from './lib/Vec';
 import Projectile from './worker/Projectile';
 import * as interpolate from 'color-interpolate';
-import PathHistory from "./Paths";
+import Paths from "./Paths";
 import Arrow from "./Arrow";
 
 interface RenderingRules {
@@ -13,17 +13,23 @@ interface RenderingRules {
 
 interface ItemsToRender {
     projectiles: Array<Projectile>;
-    particleHistory?: PathHistory;
+    pathHistory?: Map<string, Array<Vector>>;
     inputArrow?: Arrow;
 }
 
 class Renderer {
     canvas: HTMLCanvasElement;
     cx: CanvasRenderingContext2D;
+    background: HTMLCanvasElement;
+    bgx: CanvasRenderingContext2D;
+
     rules: RenderingRules;
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, background: HTMLCanvasElement) {
         this.canvas = canvas;
+        this.background = background;
         this.cx = this.canvas.getContext('2d');
+        this.cx.lineWidth = 0.5;
+        this.bgx = this.background.getContext('2d');
         this.rules = {
             forceVectors: false,
             velocityVectors: false,
@@ -36,20 +42,31 @@ class Renderer {
         this.rules = rules;
     }
 
-    render(itemsToRender : ItemsToRender) {
+    render(itemsToRender) {
+        requestAnimationFrame(() => this._render(itemsToRender));
+    }
+
+    clearBackground() {
+        requestAnimationFrame(() => {
+            this.bgx.fillRect(0,0,this.background.width, this.background.height);
+        })
+    }
+
+    _render(itemsToRender : ItemsToRender) {
         let cx = this.cx;
+        let bgx = this.bgx;
 
         cx.clearRect(0,0,this.canvas.width,this.canvas.height);
         cx.save();
+        bgx.save();
+        cx.translate(0.5,0.5);
+        bgx.translate(0.5, 0.5);
 
         if (!this.rules.cameraOrigin.equals(Vec(0,0))) {
             // TODO: Update camera position
             let {x, y} = this.rules.cameraOrigin;
             cx.translate(x, y);
-        }
-
-        if (this.rules.paths) {
-            // TODO: Add logic for particle path rendering
+            bgx.translate(x, y);
         }
 
         if (itemsToRender.inputArrow) {
@@ -65,18 +82,35 @@ class Renderer {
             cx.restore();
         }
 
-        const renderProjectile = projectile => {
+        const drawProjectileAndPath = (projectile: Projectile) => {
+            /*
+            if (this.rules.paths) {
+                let path: Vector[] = itemsToRender.pathHistory.get(projectile.id);
+                drawProjectilePath(this.bgx, path, projectile.mass);
+            }
+             */
+            if (this.rules.paths) {
+                drawDot(this.bgx, projectile.position, projectile.mass);
+            }
             drawProjectile(this.cx, projectile, this.rules);
         }
 
-        itemsToRender.projectiles.forEach(renderProjectile);
+        itemsToRender.projectiles.forEach(drawProjectileAndPath);
 
         cx.restore();
+        bgx.restore();
     }
 
 }
 
-const drawPathHistory = (cx, path, mass) => {
+const drawDot = (cx : CanvasRenderingContext2D, point : Vector, mass : number) => {
+    cx.fillStyle = cx.strokeStyle = colorMap(Math.log10(Math.max(mass, 1))/4);
+    cx.beginPath();
+    cx.fillRect(point.x, point.y, 0.7, 0.7);
+    cx.stroke();
+}
+
+const drawProjectilePath = (cx, path, mass) => {
     cx.fillStyle = cx.strokeStyle = colorMap(Math.log10(Math.max(mass, 1))/4);
 
     cx.beginPath();

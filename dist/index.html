@@ -9,6 +9,11 @@
 
 
   <div id="main">
+	  	<div id="info">
+			<p>Not to physical scale. Integration is Semi-Implicit Euler.</p>
+			<p>Click and drag to add a particle. Shift + Click and drag to move the view.</p>
+			<p>Options are to the right.</p>
+		</div>
 		<div id="graphics">
 			<canvas id="fg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 1;"></canvas>
 			<canvas id="bg" style="border: 1px solid rgb(0, 0, 0); position: absolute; z-index: 0;"></canvas>
@@ -26,9 +31,9 @@
 					<label>
 						<input id="pause" type="checkbox" />Pause
 					</label>
-					<label>
-						<input id="speed" type="number" />Speed
-					</label>
+<!--					<label>-->
+<!--						<input id="speed" type="number" />Speed-->
+<!--					</label>-->
 				</div>
 			</div>
 			<div id="display">
@@ -36,13 +41,13 @@
 				<div class="checkbox-container">
                     <label>
 						<input id="force" type="checkbox"/>Force vectors
-					</label>
+					</label><br/>
 					<label>
 						<input id="velocity" type="checkbox"/>Velocity Vectors
-					</label>
+					</label><br/>
 					<label>
 						<input id="paths" type="checkbox"/>Paths
-					</label>
+					</label><br/>
 				</div>
 
 			</div>

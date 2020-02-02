@@ -10,7 +10,7 @@ class Physics {
     rules: any;
 
     constructor(rules = {}) {
-        this.bigG = 100;
+        this.bigG = 80;
         this.projs = [];
         this.rules = rules;
     }
@@ -64,7 +64,7 @@ class Physics {
     computeCollisions() {
         return this.projs = this.projs.reduce((projectiles: Projectile[], cur: Projectile) => {
             let idx = projectiles.findIndex(other => 
-              cur.position.minus(other.position).magnitude < (cur.radius + other.radius / 2));
+              cur.position.minus(other.position).magnitude < cur.radius + other.radius);
             if (idx === -1) {
               projectiles.push(cur);
               return projectiles;

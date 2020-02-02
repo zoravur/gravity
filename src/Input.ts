@@ -8,7 +8,7 @@ import Arrow from "./Arrow";
 
 interface InputEvent {
     inputArrow?: Arrow;
-    newProjectile?: Arrow;
+    newProjectileArrow?: Arrow;
     cameraUpdate?: Vector;
 }
 
@@ -83,7 +83,7 @@ class Input extends Subject<InputEvent> {
             let delta = end.minus(startVec);
 
             this.emit({
-                newProjectile: {
+                newProjectileArrow: {
                     start: startVec,
                     delta
                 }

@@ -1,34 +1,42 @@
 import { Vector } from './lib/Vec';
-//import Projectile from './worker/Projectile';
-import {v4String} from "uuid/interfaces";
+import Projectile from './worker/Projectile';
+import * as _ from 'lodash';
 
+class Paths {
+    //currentSize : number;
+    maxSize : number;
+    map : Map<string, Array<Vector>>;
 
+    constructor() {
+        this.maxSize = 1000;
+        this.map = new Map();
+    }
 
-/*
-type ProjectilePath = {position: Vector[], mass: number}
-class PathHistory extends Map<number, ProjectilePath > {
+    get desiredLength() {
+        return Math.floor(this.maxSize / this.map.size);
+    }
 
-    addStep(projectiles: Projectile[], options) {
+    addStep(projectiles: Projectile[]) {
+        let map = this.map;
         projectiles.forEach(proj => {
-            if (this.has(proj.id)) {
-                let path = this.get(proj.id).position;
+            if (map.has(proj.id)) {
+                let path = map.get(proj.id);
                 path.unshift(proj.position);
-                path.length = Math.min(path.length, options.historyLength);
+                //++this.currentSize;
+                if (path.length > this.desiredLength) {
+                    //this.currentSize -= path.length - this.desiredLength;
+                    path.length = this.desiredLength;
+                }
             } else {
-                this.set(proj.id, {position: [proj.position], mass: proj.mass})
+                map.set(proj.id, [_.clone(proj.position)] );
+                //++this.currentSize;
             }
         });
     }
 
-    getFullHistory(): ProjectilePath[] {
-        return Array.from(this.values());
+    getFullHistory(): Map<string, Array<Vector>> {
+        return this.map;
     }
-
-
-
 }
-*/
 
-type PathHistory = Map<v4String, Array<Vector>>;
-
-export default PathHistory;
+export default Paths;

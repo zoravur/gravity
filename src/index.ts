@@ -2,13 +2,11 @@
 
 import OptionsManager from './OptionsManager';
 import Input, {InputEvent} from './Input';
-import PathHistory from './Paths';
-import optionsAuto, { Options } from './Unused/Options';
 import Renderer, {ItemsToRender, RenderingRules} from './View';
 import fitToContainer from './lib/fitToContainer';
 import Store from './Store';
 
-import 'normalize.css';
+// import 'normalize.css';
 import * as Stats from 'stats-js';
 import Vec, {Vector} from "./lib/Vec";
 import ProjectileFactory from "./ProjectileFactory";
@@ -20,11 +18,7 @@ let bg: HTMLCanvasElement = document.querySelector('#bg');
 
 document.querySelector('#graphics').insertBefore(fg,bg);
 
-let input: Input;
 let stats: Stats;
-let pathHistory;
-let optionsManager: OptionsManager;
-let renderer: Renderer;
 
 function setup() {
   fitToContainer(fg)
@@ -38,11 +32,14 @@ function setup() {
 function init() {
   // set up backwards: output, state, input
   setup();
-  renderer = new Renderer(fg);
+  let renderer = new Renderer(fg, bg);
 
   // TODO: Use filtering to set up functionalities like workflows
 
   // Stores --> View
+    //TODO: Remove paths (history) tracker
+  //let paths = new Paths();
+
   let itemsToRenderStore = new Store<ItemsToRender>({ projectiles: [] })
   itemsToRenderStore.subscribe(items => {
     renderer.render(items);
@@ -61,7 +58,9 @@ function init() {
 
   let projectileStore = new Store<Array<Projectile>>([]);
   projectileStore.subscribe(data => {
+    //paths.addStep(data);
     itemsToRenderStore.state.projectiles = data;
+    //itemsToRenderStore.state.pathHistory = paths.getFullHistory();
     itemsToRenderStore.propagate()
   })
 
@@ -73,28 +72,30 @@ function init() {
     projectileStore.propagate();
   })
 
-  optionsManager = new OptionsManager();
+  let optionsManager = new OptionsManager();
   optionsManager.registerHandlers();
   optionsManager.subscribe((options) => {
     Object.assign(renderingRulesStore.state, options.display);
     renderingRulesStore.propagate();
     projectileFactory.setMass(options.particles.mass);
+    if (!options.display.paths) renderer.clearBackground();
     if (options.playback.pause) simulator.pause();
     else simulator.play();
   });
 
-  input = new Input(fg);
+  let input = new Input(fg);
   input.subscribe((data: InputEvent) => {
     if (data.inputArrow) {
       itemsToRenderStore.state.inputArrow = data.inputArrow;
       itemsToRenderStore.propagate();
     }
     if (data.cameraUpdate) {
+      renderer.clearBackground();
       renderingRulesStore.state.cameraOrigin = data.cameraUpdate;
       renderingRulesStore.propagate();
     }
-    if (data.newProjectile) {
-      let newProjectile = projectileFactory.create(data.newProjectile);
+    if (data.newProjectileArrow) {
+      let newProjectile = projectileFactory.create(data.newProjectileArrow);
       simulator.addProjectile(newProjectile);
       projectileStore.state.push(newProjectile);
       projectileStore.propagate();
@@ -123,7 +124,7 @@ function initOld() {
   bgx.fillStyle = 'black';
   bgx.fillRect(0, 0, bg.width, bg.height);
 
-  //pathHistory = new PathHistory();
+  //pathHistory = new Paths();
 
   function handleSimulationStep(e) {
     //pathHistory.addStep(e.data.projectiles, options);
