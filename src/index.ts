@@ -58,7 +58,7 @@ function init() {
     itemsToRenderStore.state.projectiles = data;
     //itemsToRenderStore.state.pathHistory = paths.getFullHistory();
     itemsToRenderStore.propagate()
-    if (true) {
+    if (false) {
       console.log(JSON.stringify(data.map(({position: p, velocity: v, mass: m}) => ([
         [Math.round(p.x), Math.round(p.y)],
         [Math.round(v.x), Math.round(v.y)],
