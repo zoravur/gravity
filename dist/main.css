@@ -1,5 +1,6 @@
 body {
     margin: 0px;
+    position: relative;
 }
 
 #main {
@@ -60,4 +61,27 @@ button {
     width: 80px;
 }
 
+#overlay {
+    position: absolute;
+    /* z-index: 1; */
+    top: 0px;
+    right: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff11;
+    backdrop-filter: blur(10px);
+}
 
+#start {
+    padding: 1em;
+    background-color: #ffffff99;
+    z-index: 1;
+    position: absolute;
+    display: inline;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: auto;
+    backdrop-filter: blur(5px);
+
+}

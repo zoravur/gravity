@@ -12,6 +12,7 @@ import Vec, {Vector} from "./lib/Vec";
 import ProjectileFactory from "./ProjectileFactory";
 import Projectile from "./worker/Projectile";
 import Simulator from "./Simulator";
+import StartMenu from './StartMenu';
 
 let fg: HTMLCanvasElement = document.querySelector('#fg')
 let bg: HTMLCanvasElement = document.querySelector('#bg');
@@ -31,19 +32,13 @@ function setup() {
 
 function init() {
   // set up backwards: output, state, input
-  setup();
   let renderer = new Renderer(fg, bg);
 
   // TODO: Use filtering to set up functionalities like workflows
 
   // Stores --> View
-    //TODO: Remove paths (history) tracker
-  //let paths = new Paths();
-
   let itemsToRenderStore = new Store<ItemsToRender>({ projectiles: [] })
-  itemsToRenderStore.subscribe(items => {
-    renderer.render(items);
-  });
+  itemsToRenderStore.subscribe(renderer.render.bind(renderer));
 
   let renderingRulesStore = new Store<RenderingRules>({
     velocityVectors: false,
@@ -57,11 +52,19 @@ function init() {
   })
 
   let projectileStore = new Store<Array<Projectile>>([]);
+
   projectileStore.subscribe(data => {
     //paths.addStep(data);
     itemsToRenderStore.state.projectiles = data;
     //itemsToRenderStore.state.pathHistory = paths.getFullHistory();
     itemsToRenderStore.propagate()
+    if (true) {
+      console.log(JSON.stringify(data.map(({position: p, velocity: v, mass: m}) => ([
+        [Math.round(p.x), Math.round(p.y)],
+        [Math.round(v.x), Math.round(v.y)],
+        m
+      ]))));
+    }
   })
 
   // Controllers --> Middleware --> Stores
@@ -74,7 +77,7 @@ function init() {
 
   let optionsManager = new OptionsManager();
   optionsManager.registerHandlers();
-  optionsManager.subscribe((options) => {
+  optionsManager.subscribe(options => {
     Object.assign(renderingRulesStore.state, options.display);
     renderingRulesStore.propagate();
     projectileFactory.setMass(options.particles.mass);
@@ -102,7 +105,16 @@ function init() {
       itemsToRenderStore.state.inputArrow = null;
       itemsToRenderStore.propagate();
     }
-  })
+  });
+
+  let startMenu = new StartMenu();
+  startMenu.subscribe((projectiles: Array<Projectile>) => {
+    projectiles.forEach(proj => {
+      simulator.addProjectile(proj);
+      projectileStore.state.push(proj);
+    })
+    projectileStore.propagate();
+  });
 
 }
 
@@ -167,4 +179,5 @@ function initOld() {
 //   document.body.appendChild(stats.domElement);
 // })();
 
+setup();
 init();
