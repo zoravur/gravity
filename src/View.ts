@@ -1,7 +1,6 @@
 import Vec, { Vector } from './lib/Vec';
 import Projectile from './worker/Projectile';
 import * as interpolate from 'color-interpolate';
-import Paths from "./Paths";
 import Arrow from "./Arrow";
 
 interface RenderingRules {
@@ -28,7 +27,7 @@ class Renderer {
         this.canvas = canvas;
         this.background = background;
         this.cx = this.canvas.getContext('2d');
-        this.cx.lineWidth = 0.5;
+        this.cx.lineWidth = 1;
         this.bgx = this.background.getContext('2d');
         this.rules = {
             forceVectors: false,
