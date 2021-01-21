@@ -39,7 +39,7 @@
     "normalize.css": "^8.0.0",
     "object-path": "^0.11.4",
     "pixi.js": "^4.8.3",
-    "socket.io": "^2.1.0",
+    "socket.io": "^2.4.0",
     "source-map-loader": "^0.2.4",
     "stats-js": "^1.0.0-alpha1",
     "uuid": "^3.4.0"
